@@ -1,6 +1,6 @@
 {
   "name": "@angelps/react-ui-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Librería de componentes React reutilizables",
   "author": "Angel",
   "license": "MIT",
@@ -15,7 +15,9 @@
     },
     "./styles": "./dist/style.css"
   },
-  "sideEffects": ["dist/style.css"],
+  "sideEffects": [
+    "dist/style.css"
+  ],
   "files": [
     "dist"
   ],
