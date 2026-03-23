@@ -13,7 +13,11 @@
       "require": "./dist/ui-core.cjs.js",
       "types": "./dist/index.d.ts"
     },
-    "./styles": "./dist/style.css"
+    "./styles": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css",
+      "types": "./dist/styles.d.ts"
+    }
   },
   "sideEffects": [
     "dist/style.css"
