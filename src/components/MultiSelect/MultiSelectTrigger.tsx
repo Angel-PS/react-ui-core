@@ -2,7 +2,6 @@ import { type FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faX } from "@fortawesome/free-solid-svg-icons";
 import type { MultiSelectTriggerProps } from "./MultiSelect.types";
-import styles from "./MultiSelect.module.css";
 
 export const MultiSelectTrigger: FC<MultiSelectTriggerProps> = ({
   triggerRef,
@@ -27,17 +26,17 @@ export const MultiSelectTrigger: FC<MultiSelectTriggerProps> = ({
       }
     }}
   >
-    <div className={styles.tagsContainer}>
+    <div className="flex min-h-6 flex-1 flex-wrap items-center gap-2 px-3 py-1">
       {displayText ? (
-        <span className={styles.placeholder}>{displayText}</span>
+        <span className="text-gray-400">{displayText}</span>
       ) : (
         selectedOptions.map((option) => (
-          <span key={option.value} className={styles.tag}>
+          <span key={option.value} className="inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
             {option.label}
             <button
               type="button"
               onClick={(e) => onRemoveTag(option.value, e)}
-              className={styles.tagRemove}
+              className="inline-flex items-center justify-center h-4 w-4 rounded-full border-0 bg-transparent text-blue-600 cursor-pointer p-0 leading-none hover:bg-blue-200 hover:text-blue-800 disabled:cursor-not-allowed"
               disabled={disabled}
             >
               <FontAwesomeIcon icon={faX} />
@@ -49,7 +48,7 @@ export const MultiSelectTrigger: FC<MultiSelectTriggerProps> = ({
 
     <FontAwesomeIcon
       icon={faChevronDown}
-      className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}
+      className={`shrink-0 mr-2 h-4 w-4 text-[0.7rem] text-gray-800 transition-transform duration-200${isOpen ? " rotate-180" : ""}`}
     />
   </div>
 );

@@ -1,29 +1,34 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
-const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [react(), dts({
+  plugins: [tailwindcss(), react(), dts({
     include: ['src'],
     insertTypesEntry: true
   })],
+  resolve: {
+    alias: {
+      '@': resolve(dirname, 'src'),
+    },
+  },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(dirname, 'src/index.ts'),
       name: 'UiCore',
       formats: ['es', 'cjs'],
       fileName: format => `ui-core.${format}.js`
     },
     rollupOptions: {
-      // React no se incluye en el bundle — viene del proyecto consumidor
       external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         globals: {
@@ -40,11 +45,10 @@ export default defineConfig({
     projects: [{
       extends: true,
       plugins: [
-      // The plugin will run tests for the stories defined in your Storybook config
-      // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-      storybookTest({
-        configDir: path.join(dirname, '.storybook')
-      })],
+        storybookTest({
+          configDir: path.join(dirname, '.storybook')
+        })
+      ],
       test: {
         name: 'storybook',
         browser: {

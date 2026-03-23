@@ -4,7 +4,6 @@ import { useMultiSelect } from "./useMultiSelect";
 import { MultiSelectTrigger } from "./MultiSelectTrigger";
 import { MultiSelectDropdown } from "./MultiSelectDropdown";
 import type { MultiSelectProps } from "./MultiSelect.types";
-import styles from "./MultiSelect.module.css";
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({
   label,
@@ -53,20 +52,20 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   })();
 
   return (
-    <div className={styles.container} ref={containerRef}>
-      <label htmlFor={name} className={styles.label}>
+    <div className="relative block w-full mb-4" ref={containerRef}>
+      <label htmlFor={name} className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
         {label}
-        {required && <span className={styles.required}>*</span>}
+        {required && <span className="text-red-500">*</span>}
         {color && (
           <div
-            className={styles.colorDot}
+            className="h-2 w-2 rounded-full"
             style={{ backgroundColor: color }}
           />
         )}
       </label>
 
       {!loading ? (
-        <div className={styles.selectWrapper}>
+        <div className="relative h-[2.6875rem] rounded-[5px]">
           <MultiSelectTrigger
             triggerRef={triggerRef}
             selectClass={selectClass}
@@ -93,11 +92,11 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             )}
         </div>
       ) : (
-        <div className={styles.skeleton} />
+        <div className="skeleton h-[2.6875rem] rounded-[5px]" />
       )}
 
       {error && (
-        <span title={error} className={styles.errorText}>
+        <span title={error} className="absolute left-0 mt-1 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-red-500">
           {error}
         </span>
       )}
