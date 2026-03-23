@@ -1,6 +1,6 @@
 {
-  "name": "@react/ui-core",
-  "version": "0.1.1",
+  "name": "@angelps/react-ui-core",
+  "version": "0.1.0",
   "description": "Librería de componentes React reutilizables",
   "author": "Angel",
   "license": "MIT",
