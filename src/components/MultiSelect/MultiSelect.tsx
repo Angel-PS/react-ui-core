@@ -53,7 +53,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
   return (
     <div className="relative block w-full mb-4" ref={containerRef}>
-      <label htmlFor={name} className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+      <label
+        htmlFor={name}
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1"
+      >
         {label}
         {required && <span className="text-red-500">*</span>}
         {color && (
@@ -65,7 +68,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       </label>
 
       {!loading ? (
-        <div className="relative h-[2.6875rem] rounded-[5px]">
+        <div className="relative h-10.75 rounded-[0.3125rem] bg-red-500">
           <MultiSelectTrigger
             triggerRef={triggerRef}
             selectClass={selectClass}
@@ -92,11 +95,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             )}
         </div>
       ) : (
-        <div className="skeleton h-[2.6875rem] rounded-[5px]" />
+        <div className="skeleton h-10.75 rounded-[0.3125rem]" />
       )}
 
       {error && (
-        <span title={error} className="absolute left-0 mt-1 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-red-500">
+        <span
+          title={error}
+          className="absolute left-0 mt-1 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-red-500"
+        >
           {error}
         </span>
       )}

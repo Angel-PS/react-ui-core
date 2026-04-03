@@ -31,7 +31,10 @@ export const MultiSelectTrigger: FC<MultiSelectTriggerProps> = ({
         <span className="text-gray-400">{displayText}</span>
       ) : (
         selectedOptions.map((option) => (
-          <span key={option.value} className="inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
+          <span
+            key={option.value}
+            className="inline-flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800"
+          >
             {option.label}
             <button
               type="button"

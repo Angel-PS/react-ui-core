@@ -25,7 +25,7 @@ export const useMultiSelect = ({
   const prevValueRef = useRef<(string | number)[]>([]);
 
   const selectClass = [
-    "flex items-center justify-between w-full min-h-[2.6875rem] border border-gray-300 rounded-[5px] bg-white cursor-pointer outline-none transition-[border-color,box-shadow] duration-150 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]",
+    "flex items-center justify-between w-full min-h-[2.6875rem] border border-gray-300 rounded-[0.3125rem] bg-white cursor-pointer outline-none transition-[border-color,box-shadow] duration-150 focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]",
     error ? "border-red-500" : "",
     disabled ? "bg-gray-100 cursor-not-allowed" : "",
     className,
