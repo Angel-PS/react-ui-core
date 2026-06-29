@@ -28,7 +28,7 @@ export const ConError: Story = {
     name: 'con-error',
     label: 'Correo electrónico',
     placeholder: 'correo@ejemplo.com',
-    value: 'correo-invalido',
+    defaultValue: 'correo-invalido',
     error: 'Ingresa un correo válido',
   },
 };
@@ -47,7 +47,7 @@ export const Deshabilitado: Story = {
   args: {
     name: 'deshabilitado',
     label: 'Referencia',
-    value: 'REF-00123',
+    defaultValue: 'REF-00123',
     disabled: true,
   },
 };
@@ -62,46 +62,23 @@ export const Requerido: Story = {
   },
 };
 
-export const ConPrefijo: Story = {
-  name: 'Con prefijo',
+export const ConColor: Story = {
+  name: 'Con punto de color',
   args: {
-    name: 'con-prefijo',
-    label: 'Precio',
-    type: 'number',
-    placeholder: '0',
-    prefix: '$',
+    name: 'con-color',
+    label: 'Categoría',
+    placeholder: 'Nombre de la categoría',
+    color: '#6366f1',
   },
 };
 
-export const ConPrefijoColor: Story = {
-  name: 'Con prefijo de color',
+export const ConMascara: Story = {
+  name: 'Con máscara',
   args: {
-    name: 'con-prefijo-color',
-    label: 'Porcentaje',
-    type: 'number',
-    placeholder: '0',
-    prefix: '%',
-    prefixColor: '#6366f1',
-  },
-};
-
-export const TamanoSmall: Story = {
-  name: 'Tamaño pequeño (sm)',
-  args: {
-    name: 'size-sm',
-    label: 'Búsqueda',
-    placeholder: 'Buscar...',
-    size: 'sm',
-  },
-};
-
-export const TamanoLarge: Story = {
-  name: 'Tamaño grande (lg)',
-  args: {
-    name: 'size-lg',
-    label: 'Descripción',
-    placeholder: 'Escribe una descripción...',
-    size: 'lg',
+    name: 'telefono',
+    label: 'Teléfono',
+    mask: '(___) ___-____',
+    placeholder: '(000) 000-0000',
   },
 };
 

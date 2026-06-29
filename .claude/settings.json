@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npx eslint:*)",
+      "Bash(./node_modules/.bin/eslint src/components/Modal/Modal.test.tsx src/components/Input/Input.test.tsx src/components/MultiSelect/MultiSelect.test.tsx)",
+      "Bash(npx vitest:*)"
+    ]
+  }
+}

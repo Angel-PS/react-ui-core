@@ -1,12 +1,565 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
 
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Font — Geist everywhere. `--font-inter` is kept as a backward-compatible
+     alias (still referenced by some components) but resolves to Geist. */
+  --font-inter: "Geist Variable", sans-serif;
+
+  /* Brand blue — #4061a8 is the canonical anchor. */
+  --color-primary-blue-default: #4061a8;
+  --color-primary-blue-hover: #3a72c4;
+  --color-primary-blue-dark: #2f4cbc;
+  --color-primary-blue-darker: #1f337e;
+  --color-primary-blue-light: #9fb3fd;
+  --color-primary-blue-lighter: #d0d9fe;
+  --color-primary-blue-lightest: #ecf0ff;
+
+  --color-description-helper: #6b7280;
+
+  /* Error — standard, AA-friendly red. */
+  --color-alerts-error: #ef4444;
+
+  /* Restrained amber accent — highlights / key CTAs only, never a default action. */
+  --color-accent-amber: #f59e0b;
+  --color-accent-amber-soft: #fffbeb;
+  --color-accent-amber-strong: #b45309;
+
+  --color-gray-light: #f7f9fc;
+  --color-gray-dark: #d4d4d4;
+
+  /* Refined multi-layer soft shadow scale (slate-tinted, Linear/Stripe feel).
+     Overrides Tailwind defaults so every shadow-* is upgraded at once. */
+  --shadow-2xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 2px -1px rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 2px 4px -2px rgba(15, 23, 42, 0.06), 0 6px 16px -4px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 4px 8px -4px rgba(15, 23, 42, 0.08), 0 12px 28px -8px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 8px 16px -6px rgba(15, 23, 42, 0.10), 0 24px 48px -12px rgba(15, 23, 42, 0.18);
+  --shadow-2xl: 0 16px 32px -8px rgba(15, 23, 42, 0.14), 0 40px 72px -16px rgba(15, 23, 42, 0.22);
 }
 
-@utility skeleton {
-  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+html,
+body {
+  @apply font-sans text-[14px] text-gray-800 antialiased lg:text-[16px] dark:text-slate-100;
+}
+
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+
+  select {
+    @apply font-sans h-10 rounded-lg border border-gray-300 bg-white px-3 text-gray-700 shadow-xs outline-none transition duration-200 hover:border-gray-400 focus:border-primary-blue-default focus:ring-2 focus:ring-primary-blue-light/50 focus:outline-none disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:disabled:border-slate-800 dark:disabled:bg-slate-800 dark:disabled:text-slate-500;
+  }
+
+  option {
+    @apply rounded-lg bg-white dark:bg-slate-900 dark:text-slate-200;
+  }
+
+  textarea {
+    @apply font-sans rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-gray-700 shadow-xs outline-none transition duration-200 hover:border-gray-400 focus:border-primary-blue-default focus:ring-2 focus:ring-primary-blue-light/50 focus:outline-none disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:disabled:border-slate-800 dark:disabled:bg-slate-800 dark:disabled:text-slate-500;
+  }
+
+  p {
+    @apply text-[1rem];
+  }
+
+  h1 {
+    @apply text-[2rem];
+  }
+
+  h2 {
+    @apply text-[1.8rem];
+  }
+
+  h3 {
+    @apply text-[1.6rem];
+  }
+
+  h4 {
+    @apply text-[1.4rem];
+  }
+
+  h5 {
+    @apply text-[1.2rem];
+  }
+
+  h6 {
+    @apply text-[1rem];
+  }
+
+  label {
+    @apply mb-1 ml-[2px] block overflow-hidden text-left text-[.9rem] font-semibold text-gray-700 dark:text-slate-300;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .input {
+    @apply font-sans h-10 rounded-lg border border-gray-300 bg-white px-3 text-gray-700 shadow-xs outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-400 focus:border-primary-blue-default focus:ring-2 focus:ring-primary-blue-light/50 focus:outline-none disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:hover:border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:disabled:border-slate-800 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:disabled:hover:border-slate-800;
+  }
+  .base-button {
+    @apply relative flex w-full cursor-pointer place-items-center gap-4 rounded-none bg-transparent px-[2rem] py-3 text-[1rem] text-gray-600 normal-case no-underline transition-colors duration-200 hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-800;
+  }
+
+  .primary-button {
+    @apply bg-primary-blue-default font-sans hover:bg-primary-blue-hover disabled:bg-primary-blue-darker focus-visible:ring-2 focus-visible:ring-primary-blue-light focus-visible:ring-offset-1 cursor-pointer rounded-lg px-4 py-2 text-[0.875rem] font-[700] text-white shadow-sm transition-colors duration-200 outline-none disabled:cursor-default disabled:shadow-none;
+  }
+
+  .cancel-button {
+    @apply rounded-lg bg-red-500 text-white shadow-sm outline-none transition-colors duration-200 hover:bg-red-600 focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-1 disabled:bg-red-600 disabled:shadow-none;
+  }
+
+  .save-button {
+    @apply rounded-lg bg-emerald-500 text-white shadow-sm outline-none transition-colors duration-200 hover:bg-emerald-600 focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-1 disabled:bg-emerald-600 disabled:shadow-none;
+  }
+
+  .secondary-button {
+    @apply border-primary-blue-default text-primary-blue-default disabled:hover:border-primary-blue-default disabled:hover:text-primary-blue-default rounded-lg border bg-transparent outline-none transition-colors duration-200 hover:border-primary-blue-hover hover:bg-primary-blue-lightest hover:text-primary-blue-hover focus-visible:ring-2 focus-visible:ring-primary-blue-light focus-visible:ring-offset-1 disabled:bg-slate-400;
+  }
+
+  .base-input {
+    @apply font-sans h-10 rounded-lg border border-gray-300 bg-white px-3 text-gray-700 shadow-xs outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-400 focus:border-primary-blue-default focus:ring-2 focus:ring-primary-blue-light/50 focus:outline-none disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:hover:border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:disabled:border-slate-800 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:disabled:hover:border-slate-800;
+  }
+
+  .error-input {
+    @apply border-alerts-error bg-red-50 dark:bg-red-950/30;
+  }
+
+  .panel-container {
+    @apply h-full overflow-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-md md:p-6 dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  .icons {
+    @apply text-primary-blue-default transition-colors duration-200 hover:text-primary-blue-hover;
+  }
+}
+
+.modal-background {
+  @apply fixed inset-0 bg-black opacity-30 dark:opacity-60;
+}
+
+/* ── Custom scrollbars — subtle, theme-aware ──────────────
+   Light by default, slate in dark. Covers the page, modals and horizontal
+   table scrollers so the OS-default (bright) scrollbar never shows. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark * {
+  scrollbar-color: #334155 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+  background-clip: content-box;
+}
+
+/* Custom square checkbox (used by InputCheckbox). */
+.round {
+  position: relative;
+}
+
+.round label {
+  background-color: #fff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 7px;
+  cursor: pointer;
+  height: 28px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 28px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.dark .round label {
+  background-color: #0f172a;
+  border-color: #334155;
+}
+
+.round label:hover {
+  border-color: var(--color-primary-blue-light);
+}
+
+.round label:after {
+  border: 2px solid #fff;
+  border-top: none;
+  border-right: none;
+  content: "";
+  height: 6px;
+  left: 7px;
+  opacity: 0;
+  position: absolute;
+  top: 8px;
+  transform: rotate(-45deg);
+  width: 12px;
+}
+
+.round input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 28px;
+  width: 28px;
+  margin: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.round input[type="checkbox"]:checked + label {
+  background-color: var(--color-primary-blue-default);
+  border-color: var(--color-primary-blue-default);
+  box-shadow: 0 1px 3px -1px rgba(64, 97, 168, 0.5);
+}
+
+.round input[type="checkbox"]:focus-visible + label {
+  outline: 2px solid var(--color-primary-blue-light);
+  outline-offset: 2px;
+}
+
+.round input[type="checkbox"]:checked + label:after {
+  opacity: 1;
+}
+
+/* Loading skeleton — shimmer placeholder. */
+.skeleton {
+  background: #e2e8f0;
+  background: linear-gradient(110deg, #e2e8f0 8%, #f1f5f9 18%, #e2e8f0 33%);
+  border-radius: 8px;
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: 1.5s shine linear infinite;
+}
+
+.dark .skeleton {
+  background: #1e293b;
+  background: linear-gradient(110deg, #1e293b 8%, #334155 18%, #1e293b 33%);
+}
+
+/* Hide the spin buttons on number inputs. */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+}
+
+/* Native date/time inputs render their calendar icon and picker popup from the
+   element's color-scheme. Flip it with the theme so the icon is light (not a
+   black glyph) and the popup is dark in dark mode. */
+input[type="date"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: light;
+}
+
+.dark input[type="date"],
+.dark input[type="month"],
+.dark input[type="week"],
+.dark input[type="time"],
+.dark input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+@keyframes loading-dot {
+  0%,
+  33%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.loading-dot {
+  opacity: 0.25;
+  transform: scale(0.75);
+  animation: loading-dot 1.2s ease-in-out infinite;
+}
+
+/* ── Animations ───────────────────────────────────────── */
+
+@keyframes bp-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-bottom {
+  -webkit-animation: slide-in-bottom 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    both;
+  animation: slide-in-bottom 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-in-bottom {
+  0% {
+    -webkit-transform: translateY(100px);
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-in-bottom {
+  0% {
+    -webkit-transform: translateY(100px);
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-left {
+  -webkit-animation: slide-left 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-left 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-left {
+  0% {
+    -webkit-transform: translateX(100px);
+    transform: translateX(100px);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+@keyframes slide-left {
+  0% {
+    -webkit-transform: translateX(100px);
+    transform: translateX(100px);
+  }
+  100% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+
+/* Respect users who prefer reduced motion — neutralize decorative motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skeleton {
+    animation: none !important;
+    background: #e2e8f0 !important;
+  }
+
+  .loading-dot,
+  .slide-in-bottom,
+  .slide-left {
+    animation: none !important;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* ── Dark mode — elegant slate-charcoal palette ───────────
+   Toggled by `.dark` on <html> (the consumer owns the toggle). Redefining the
+   shadcn semantic tokens here flips everything that uses bg-background/bg-card/
+   border-border/etc., and redefining the brand `--color-*` ramp flips every
+   bg/text-primary-blue-* utility at once (Tailwind v4 emits utilities as
+   var(--color-…)). Only built-in neutrals (bg-white, text-gray-*, …) still need
+   per-element `dark:` variants. */
+.dark {
+  /* shadcn semantic tokens (slate-charcoal) */
+  --background: #020617; /* slate-950 — page background */
+  --foreground: #f8fafc; /* slate-50 — primary text */
+  --card: #0f172a; /* slate-900 — panels / cards */
+  --card-foreground: #f8fafc;
+  --popover: #1e293b; /* slate-800 — menus / dropdowns */
+  --popover-foreground: #f8fafc;
+  --primary: #6d8fe8; /* lifted brand blue */
+  --primary-foreground: #0b1220;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8; /* slate-400 — AA on slate-900 */
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  --destructive: #f87171;
+  --border: #334155; /* slate-700 */
+  --input: #334155;
+  --ring: #6d8fe8;
+  --chart-1: #6d8fe8;
+  --chart-2: #38bdf8;
+  --chart-3: #34d399;
+  --chart-4: #fbbf24;
+  --chart-5: #f87171;
+  /* sidebar tokens */
+  --sidebar: #0f172a;
+  --sidebar-foreground: #cbd5e1;
+  --sidebar-primary: #6d8fe8;
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #6d8fe8;
+
+  /* Brand ramp remap — flips every bg/text-primary-blue-* utility at once. */
+  --color-primary-blue-default: #5b82d6;
+  --color-primary-blue-hover: #6d8fe8;
+  --color-primary-blue-dark: #7c9eed;
+  --color-primary-blue-darker: #4061a8;
+  --color-primary-blue-light: #38456b; /* focus ring on dark */
+  --color-primary-blue-lighter: #233152;
+  --color-primary-blue-lightest: #18233c; /* active-item bg on dark */
+  --color-gray-light: #0f172a;
+  --color-gray-dark: #334155;
+  --color-accent-amber-soft: #2a2410;
+  --color-description-helper: #94a3b8; /* slate-400 — matches --muted-foreground, AA on slate-900 */
 }

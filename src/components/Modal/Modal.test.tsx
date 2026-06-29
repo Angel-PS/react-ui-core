@@ -70,19 +70,19 @@ describe('Modal', () => {
     it('renderiza el botón de cierre cuando canClose=true y onHide está definido', () => {
       const onHide = vi.fn();
       render(<Modal title="Test" onHide={onHide} canClose><span>Content</span></Modal>);
-      expect(screen.getByRole('button', { name: /close modal/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
     });
 
     it('no renderiza el botón de cierre cuando canClose=false', () => {
       const onHide = vi.fn();
       render(<Modal title="Test" onHide={onHide} canClose={false}><span>Content</span></Modal>);
-      expect(screen.queryByRole('button', { name: /close modal/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
     });
 
     it('llama a onHide al hacer click en el botón de cierre', () => {
       const onHide = vi.fn();
       render(<Modal title="Test" onHide={onHide}><span>Content</span></Modal>);
-      fireEvent.click(screen.getByRole('button', { name: /close modal/i }));
+      fireEvent.click(screen.getByRole('button', { name: /close/i }));
       expect(onHide).toHaveBeenCalledTimes(1);
     });
   });

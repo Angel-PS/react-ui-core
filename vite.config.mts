@@ -14,6 +14,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [tailwindcss(), react(), dts({
     include: ['src'],
+    exclude: ['src/**/*.stories.tsx', 'src/**/*.test.{ts,tsx}', 'src/test/**'],
     insertTypesEntry: true
   })],
   resolve: {

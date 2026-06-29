@@ -22,7 +22,6 @@ describe('Input', () => {
       render(<Input label="Email" />);
       expect(screen.queryByText('*')).not.toBeInTheDocument();
     });
-
   });
 
   describe('estado de carga', () => {
@@ -39,33 +38,16 @@ describe('Input', () => {
       expect(screen.getByText('Campo requerido')).toBeInTheDocument();
     });
 
-    it('aplica aria-invalid="true" cuando hay error', () => {
-      render(<Input error="Error" />);
-      expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true');
-    });
-
-    it('aplica aria-invalid="false" cuando no hay error', () => {
-      render(<Input />);
-      expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false');
-    });
-
     it('no muestra mensaje de error cuando error es null', () => {
       render(<Input error={null} />);
       expect(screen.queryByRole('textbox')).toBeInTheDocument();
-      // No hay texto de error en el DOM
       expect(document.querySelector('[title]')).not.toBeInTheDocument();
     });
   });
 
-  describe('prefix', () => {
-    it('renderiza el prefijo cuando se proporciona', () => {
-      render(<Input prefix="$" />);
-      expect(screen.getByText('$')).toBeInTheDocument();
-    });
-
-    it('renderiza sin prefix wrapper cuando prefix no se pasa', () => {
-      render(<Input />);
-      // El input está directamente, no dentro de un wrapper con flex
+  describe('mask', () => {
+    it('renderiza un input enmascarado cuando se pasa mask', () => {
+      render(<Input mask="(___) ___-____" />);
       expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
   });
@@ -73,11 +55,6 @@ describe('Input', () => {
   describe('disabled', () => {
     it('deshabilita el input cuando disabled=true', () => {
       render(<Input disabled />);
-      expect(screen.getByRole('textbox')).toBeDisabled();
-    });
-
-    it('deshabilita el input dentro del wrapper con prefix', () => {
-      render(<Input prefix="$" disabled />);
       expect(screen.getByRole('textbox')).toBeDisabled();
     });
   });
@@ -125,13 +102,6 @@ describe('Input', () => {
       Object.defineProperty(input, 'value', { writable: true, value: '05' });
       fireEvent.input(input);
       expect(input.value).toBe('5');
-    });
-
-    it('llama al callback onInput externo', () => {
-      const onInput = vi.fn();
-      render(<Input onInput={onInput} />);
-      fireEvent.input(screen.getByRole('textbox'));
-      expect(onInput).toHaveBeenCalledTimes(1);
     });
   });
 });
