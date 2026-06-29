@@ -1,7 +1,7 @@
 import { useState, type FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { Table, ColumnManager } from "../Table";
+import { Table, ColumnManager, type TableLabels } from "../Table";
 import { Button } from "../Button";
 import { ConfirmDialog, type ConfirmDialogItemDetail } from "../ConfirmDialog";
 import { MaintenanceFilters, type FilterController } from "../Filters";
@@ -106,6 +106,8 @@ type BaseMaintenanceLayoutProps = {
   defaultShowCreate?: boolean;
   /** UI text overrides (English by default). */
   labels?: Partial<MaintenanceLayoutLabels>;
+  /** Text overrides forwarded to the inner <Table> (e.g. a `status` display map). */
+  tableLabels?: Partial<TableLabels>;
 
   // ── Controlled table state (forwarded to <Table>) ──
   sort?: string | null;
@@ -171,6 +173,7 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
   onNavigate,
   defaultShowCreate = false,
   labels,
+  tableLabels,
   sort = null,
   onSortChange,
   searchValue,
@@ -367,6 +370,7 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
             onSortChange={onSortChange}
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
+            labels={tableLabels}
           />
         </div>
       </div>

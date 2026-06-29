@@ -350,6 +350,39 @@ input[type="datetime-local"] {
   }
 }
 
+/* Dropdown / popover entrance — used by navbar menus (user, language,
+   notifications) and the command palette backdrop. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.14s ease-out both;
+}
+
+/* Centered dialog entrance — used by the command palette panel. */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.16s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
 .slide-in-bottom {
   -webkit-animation: slide-in-bottom 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)
     both;
@@ -425,7 +458,9 @@ input[type="datetime-local"] {
 
   .loading-dot,
   .slide-in-bottom,
-  .slide-left {
+  .slide-left,
+  .animate-fadeIn,
+  .animate-scaleIn {
     animation: none !important;
   }
 }

@@ -75,6 +75,80 @@ export type {
   SearchToolbarLabels,
 } from "./components/MaintenanceLayout";
 
+// ── App Shell ─────────────────────────────────────────────────────────────────
+export { AppLayout } from "./components/AppLayout";
+export type {
+  AppLayoutProps,
+  SidebarSlotState,
+  NavbarSlotState,
+} from "./components/AppLayout";
+export { Sidebar, CompanySwitcher, isPathActive } from "./components/Sidebar";
+export type {
+  SidebarProps,
+  SidebarGroup,
+  SidebarItem,
+  SidebarLabels,
+  CompanyOption,
+  CompanySwitcherProps,
+  CompanySwitcherLabels,
+} from "./components/Sidebar";
+export { Navbar } from "./components/Navbar";
+export type { NavbarProps, NavbarLabels } from "./components/Navbar";
+export { Breadcrumbs, collapseTrail } from "./components/Breadcrumbs";
+export type {
+  BreadcrumbsProps,
+  BreadcrumbsLabels,
+  BreadcrumbItem,
+} from "./components/Breadcrumbs";
+export { AlertBanner } from "./components/AlertBanner";
+export type {
+  AlertBannerProps,
+  AlertBannerLabels,
+  AlertBannerTone,
+} from "./components/AlertBanner";
+
+// ── Navbar widgets ──────────────────────────────────────────────────────────
+export { ThemeToggle } from "./components/ThemeToggle";
+export type { ThemeToggleProps, ThemeToggleLabels } from "./components/ThemeToggle";
+export { SearchTrigger } from "./components/SearchTrigger";
+export type {
+  SearchTriggerProps,
+  SearchTriggerLabels,
+} from "./components/SearchTrigger";
+export { UserMenu } from "./components/UserMenu";
+export type {
+  UserMenuProps,
+  UserMenuItem,
+  UserMenuLabels,
+} from "./components/UserMenu";
+export { LanguageSwitcher } from "./components/LanguageSwitcher";
+export type {
+  LanguageSwitcherProps,
+  LanguageSwitcherLabels,
+  LanguageOption,
+} from "./components/LanguageSwitcher";
+export { NewActionMenu } from "./components/NewActionMenu";
+export type {
+  NewActionMenuProps,
+  NewActionMenuLabels,
+  NewActionGroup,
+  NewActionOption,
+} from "./components/NewActionMenu";
+export { NotificationBell, NotificationListItem } from "./components/NotificationBell";
+export type {
+  NotificationBellProps,
+  NotificationBellLabels,
+  NotificationListItemProps,
+  NotificationItem,
+} from "./components/NotificationBell";
+export { CommandPalette, filterSections } from "./components/CommandPalette";
+export type {
+  CommandPaletteProps,
+  CommandPaletteLabels,
+  CommandSection,
+  CommandItem,
+} from "./components/CommandPalette";
+
 // ── Hooks ───────────────────────────────────────────────────────────────────
 export { useClickOutside } from "./hooks";
 

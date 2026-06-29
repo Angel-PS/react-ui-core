@@ -43,6 +43,14 @@ export const statusStyles: Record<string, { badge: string; dot: string }> = {
   basic: { badge: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
   pro: { badge: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300", dot: "bg-violet-500" },
   enterprise: { badge: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
+  // Deployment-environment badges (namespaced so they never collide with the
+  // generic statuses above). Production is the high-alert red; lower environments
+  // step down in intensity. Color is paired with a text label by the consumer, so
+  // it is never the sole signal.
+  "env-local": { badge: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300", dot: "bg-slate-400" },
+  "env-development": { badge: "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300", dot: "bg-sky-500" },
+  "env-staging": { badge: "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300", dot: "bg-amber-500" },
+  "env-production": { badge: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300", dot: "bg-red-500" },
 };
 
 export const getStatusStyle = (status: string) =>
