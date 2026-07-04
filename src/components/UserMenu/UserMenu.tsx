@@ -47,7 +47,7 @@ export const UserMenu = ({
   return (
     <div
       ref={ref}
-      className="relative hidden items-center gap-3 border-l border-gray-200 pl-4 md:flex lg:pl-6 dark:border-slate-800"
+      className="relative flex items-center gap-3 border-l border-gray-200 pl-2 md:pl-4 lg:pl-6 dark:border-slate-800"
     >
       <button
         type="button"
@@ -57,7 +57,7 @@ export const UserMenu = ({
         aria-label={l.userMenu}
         className="focus-visible:ring-primary-blue-light flex cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-2 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-800"
       >
-        <span className="text-right">
+        <span className="hidden text-right sm:block">
           <span className="block truncate text-sm font-semibold text-gray-800 dark:text-slate-100">
             {fullName}
           </span>
