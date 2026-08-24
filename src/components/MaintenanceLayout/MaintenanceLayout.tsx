@@ -272,6 +272,12 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
       });
     }
 
+    if (extraActions?.length) {
+      actions.push(...extraActions);
+    }
+
+    // Delete goes last, after the consumer's own actions: the destructive item
+    // should never sit in the middle of the menu.
     if (canDelete && onDelete) {
       actions.push({
         label: l.delete,
@@ -280,10 +286,6 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
         hidden: (row) => row.showActions === false || row.canDelete === false,
         variant: "danger",
       });
-    }
-
-    if (extraActions?.length) {
-      actions.push(...extraActions);
     }
   }
 
