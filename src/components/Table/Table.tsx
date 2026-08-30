@@ -57,6 +57,17 @@ export interface TableProps {
   onPageSizeChange?: (size: number) => void;
   /** Page size fallback when `metadata.pagination.size` is absent. Default 25. */
   defaultPageSize?: number;
+  /**
+   * Rendered inside the card, above the column headers — the counterpart to the
+   * `<Pagination>` footer. Built for `<TableFreshnessBar>`.
+   */
+  toolbar?: React.ReactNode;
+  /**
+   * A refresh is in flight over rows that are already on screen. Unlike
+   * `isLoading` (which swaps the body for skeletons) this keeps the rows and
+   * only marks them busy, so a manual refresh never blanks the table.
+   */
+  isRefreshing?: boolean;
   labels?: Partial<TableLabels>;
 }
 
@@ -187,6 +198,8 @@ export const Table = ({
   onPageChange,
   onPageSizeChange,
   defaultPageSize = 25,
+  toolbar,
+  isRefreshing = false,
   labels,
 }: TableProps) => {
   const l: TableLabels = {
@@ -322,7 +335,11 @@ export const Table = ({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-      <div className="max-h-[60dvh] overflow-x-auto overflow-y-auto">
+      {toolbar}
+      <div
+        aria-busy={isRefreshing || undefined}
+        className="max-h-[60dvh] overflow-x-auto overflow-y-auto"
+      >
         <table className="w-full border-collapse text-left">
           {/* ── Header ── */}
           <thead className="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm">
@@ -399,7 +416,11 @@ export const Table = ({
           </thead>
 
           {/* ── Body ── */}
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+          <tbody
+            className={`divide-y divide-slate-50 transition-opacity duration-200 motion-reduce:transition-none dark:divide-slate-800 ${
+              isRefreshing ? "opacity-60" : "opacity-100"
+            }`}
+          >
             {isLoading &&
               Array.from({ length: SKELETON_ROW_COUNT }).map((_, rowIndex) => (
                 <tr key={`skeleton-${rowIndex}`}>

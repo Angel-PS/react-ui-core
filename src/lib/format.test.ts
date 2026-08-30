@@ -1,6 +1,7 @@
 import {
   formatDate,
   formatDecimal,
+  formatRelativeTime,
   getInitials,
   cleanStatusValue,
   capitalizeWords,
@@ -51,6 +52,47 @@ describe("format", () => {
     });
     it("returns empty string for empty input", () => {
       expect(capitalizeWords("")).toBe("");
+    });
+  });
+
+  describe("formatRelativeTime", () => {
+    // `now` is passed explicitly everywhere: the function stays pure, so these
+    // assertions never depend on the wall clock.
+    const now = new Date("2026-08-30T14:32:00Z").getTime();
+
+    it("picks the largest unit that still fits", () => {
+      expect(formatRelativeTime(now - 45_000, now)).toBe("45 seconds ago");
+      expect(formatRelativeTime(now - 5 * 60_000, now)).toBe("5 minutes ago");
+      expect(formatRelativeTime(now - 3 * 3_600_000, now)).toBe("3 hours ago");
+    });
+
+    it("uses the numeric:auto wording for a one-unit gap", () => {
+      expect(formatRelativeTime(now - 24 * 3_600_000, now)).toBe("yesterday");
+    });
+
+    it("formats future instants too", () => {
+      expect(formatRelativeTime(now + 2 * 60_000, now)).toBe("in 2 minutes");
+    });
+
+    it("honours the locale", () => {
+      expect(formatRelativeTime(now - 5 * 60_000, now, "es")).toBe(
+        "hace 5 minutos",
+      );
+    });
+
+    it("accepts Date and ISO string inputs", () => {
+      expect(formatRelativeTime(new Date(now - 60_000), now)).toBe(
+        "1 minute ago",
+      );
+      expect(
+        formatRelativeTime(new Date(now - 60_000).toISOString(), now),
+      ).toBe("1 minute ago");
+    });
+
+    it("returns an empty string for missing or invalid input", () => {
+      expect(formatRelativeTime(null, now)).toBe("");
+      expect(formatRelativeTime(undefined, now)).toBe("");
+      expect(formatRelativeTime("not a date", now)).toBe("");
     });
   });
 });
