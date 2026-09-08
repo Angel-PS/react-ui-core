@@ -88,7 +88,8 @@ Toggle dark mode by adding/removing `dark` on `<html>`. All text can be localize
 
 - **Build:** `npm run build` = `tsc --noEmit && vite build`. This is the real gate — it typechecks **all** of `src` (including stories and tests) and emits `dist/ui-core.es.js`, `dist/ui-core.cjs.js`, `dist/style.css`, and `dist/index.d.ts`. **It must pass before anything ships.**
 - **Vite library mode:** only `react`, `react-dom`, `react/jsx-runtime` are externalized; everything else (clsx, tailwind-merge, FontAwesome, @react-input/mask) is bundled so the package works out of the box. `@fontsource-variable/geist` and `tw-animate-css` are compiled into the emitted `style.css`.
-- **Tests:** `npm test` = `vitest run --project=unit` (jsdom). Add a `*.test.tsx` for every component; favor pure-logic tests (`applyColumnPrefs`, `serialize`, `helpers`, `format`) plus behavior tests. The CI `build` job runs `npm test`, so tests must stay green.
+- **Tests:** `npm test` = `vitest run --project=unit` (jsdom). **Every functionality you add or change ships with a test that proves it works** — a feature is not done until a test exists that fails without your change and passes with it, and a bug fix ships with the test that reproduces the bug. Tests are colocated: `<Name>.test.tsx` in the component's own folder, `*.test.ts` beside the module in `src/lib`. Favor pure-logic tests (`applyColumnPrefs`, `serialize`, `helpers`, `format`) plus behavior tests; if a behavior is hard to test inside a component, lift it into `src/lib` (which is pure by rule) and test it there. The CI `build` job runs `npm test`, so tests must stay green.
+- **Caveat — `npm test` is not the whole suite:** it is `--project=unit` only, so the `storybook` project (real Chromium via `@vitest/browser-playwright`) never runs, in CI either. Run it explicitly with `npx vitest run --project=storybook` when you touch a story or a component's rendered output.
 - **Storybook:** `npm run storybook`. Add a `*.stories.tsx` per public component.
 - **Publishing is tag-driven and maintainer-owned** (mirrors `core-prisma-query-builder`). To release: bump `version` in `package.json`, commit, then push a `v*` git tag. [`.github/workflows/npm-publish.yml`](.github/workflows/npm-publish.yml) runs build + test, then `npm publish` to npmjs.org using the `npm_token` repo secret (`prepublishOnly` rebuilds). Do not run `npm publish` by hand.
 - **Versioning (SemVer):** new component / backward-compatible feature → minor; fix → patch; breaking prop/API change → major.
@@ -103,6 +104,7 @@ Toggle dark mode by adding/removing `dark` on `<html>`. All text can be localize
 - **Dark mode:** prefer auto-flipping brand/semantic utilities; pair raw neutrals with `dark:`. Verify in both themes.
 - **FontAwesome only; merge classes with `cn`.**
 - **`src/lib` is pure** (no React/component imports).
+- **Every functionality ships with a test** — colocated `<Name>.test.tsx` / `*.test.ts`, added in the same change as the code.
 - **`npm run build` must pass** (it typechecks stories + tests too) and **`npm test` must be green** before reporting work done.
 - **Releases:** bump version → push `v*` tag → workflow publishes. Maintainer-owned.
 

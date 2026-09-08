@@ -120,9 +120,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {error && (
+          // In normal flow, not absolutely positioned: an overlaid message sits
+          // on top of whatever the consumer renders under the field (hint copy,
+          // a password-rules checklist). Costs ~16px of height while an error is
+          // showing; that is preferable to unreadable stacked text.
           <span
-            title={error}
-            className="text-alerts-error absolute left-0 max-w-full truncate overflow-hidden text-xs font-medium"
+            role="alert"
+            className="text-alerts-error mt-1 block text-xs font-medium"
           >
             {error}
           </span>

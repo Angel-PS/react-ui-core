@@ -61,9 +61,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <div className="skeleton h-10.75"></div>
         )}
         {error && (
+          // In normal flow — see the note in Input.tsx.
           <span
-            title={error}
-            className="text-alerts-error absolute left-0 max-w-full truncate overflow-hidden text-xs font-medium"
+            role="alert"
+            className="text-alerts-error mt-1 block text-xs font-medium"
           >
             {error}
           </span>

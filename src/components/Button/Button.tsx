@@ -28,9 +28,9 @@ export const Button: FC<ButtonProps> = ({
 
   const styles = {
     classic: `${base} bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-800 dark:text-slate-100 border border-gray-200 dark:border-slate-800 shadow-xs hover:border-gray-300 dark:hover:border-slate-600 disabled:bg-gray-100 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-slate-500`,
-    primary: `${base} bg-primary-blue-default hover:bg-primary-blue-hover text-white font-semibold shadow-sm hover:shadow-md disabled:bg-primary-blue-darker`,
+    primary: `${base} bg-primary-blue-default hover:bg-primary-blue-hover text-white font-semibold shadow-sm hover:shadow-md disabled:opacity-50 disabled:hover:bg-primary-blue-default`,
     secondary: `${base} bg-primary-blue-lightest hover:bg-primary-blue-lighter text-primary-blue-dark shadow-xs disabled:opacity-50`,
-    cancel: `${base} bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md focus-visible:ring-red-300 disabled:bg-red-600`,
+    cancel: `${base} bg-red-500 hover:bg-red-600 text-white shadow-sm hover:shadow-md focus-visible:ring-red-300 disabled:opacity-50 disabled:hover:bg-red-500`,
     "active-filter": `font-sans cursor-pointer rounded-lg px-4 py-1.5 text-[0.875rem] border border-primary-blue-light font-semibold transition-all duration-200 text-primary-blue-default bg-primary-blue-lightest shadow-xs`,
     "inactive-filter": `font-sans cursor-pointer rounded-lg border border-transparent px-4 py-1.5 text-[0.875rem] font-medium transition-all duration-200 bg-transparent text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200`,
     "toolbar-button": `rounded-lg p-2 text-gray-500 dark:text-slate-400 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 disabled:text-gray-300 dark:disabled:text-slate-600 disabled:hover:bg-transparent`,

@@ -99,9 +99,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       )}
 
       {error && (
+        // In normal flow — see the note in Input.tsx.
         <span
-          title={error}
-          className="absolute left-0 mt-1 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-red-500"
+          role="alert"
+          className="mt-1 block text-sm text-red-500"
         >
           {error}
         </span>

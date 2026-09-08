@@ -35,13 +35,13 @@ describe('Input', () => {
   describe('error', () => {
     it('muestra el mensaje de error', () => {
       render(<Input error="Campo requerido" />);
-      expect(screen.getByText('Campo requerido')).toBeInTheDocument();
+      expect(screen.getByRole('alert')).toHaveTextContent('Campo requerido');
     });
 
     it('no muestra mensaje de error cuando error es null', () => {
       render(<Input error={null} />);
       expect(screen.queryByRole('textbox')).toBeInTheDocument();
-      expect(document.querySelector('[title]')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
   });
 
