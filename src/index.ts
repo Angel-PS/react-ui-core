@@ -29,6 +29,11 @@ export type {
   TableLabels,
   ColumnManagerLabels,
 } from "./components/Table";
+export { TableFreshnessBar } from "./components/TableFreshnessBar";
+export type {
+  TableFreshnessBarProps,
+  TableFreshnessLabels,
+} from "./components/TableFreshnessBar";
 export { Pagination } from "./components/Pagination";
 export type { PaginationProps, PaginationLabels } from "./components/Pagination";
 
@@ -150,7 +155,7 @@ export type {
 } from "./components/CommandPalette";
 
 // ── Hooks ───────────────────────────────────────────────────────────────────
-export { useClickOutside } from "./hooks";
+export { useClickOutside, useElapsedSince } from "./hooks";
 
 // ── Lib ─────────────────────────────────────────────────────────────────────
 export { cn } from "./lib/utils";
@@ -159,6 +164,7 @@ export { applyColumnPrefs } from "./lib/applyColumnPrefs";
 export {
   formatDate,
   formatDecimal,
+  formatRelativeTime,
   getInitials,
   cleanStatusValue,
   capitalizeWords,

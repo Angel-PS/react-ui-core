@@ -51,6 +51,50 @@ export function formatDate(
   return formatted;
 }
 
+const RELATIVE_DIVISIONS: {
+  amount: number;
+  unit: Intl.RelativeTimeFormatUnit;
+}[] = [
+  { amount: 60, unit: "second" },
+  { amount: 60, unit: "minute" },
+  { amount: 24, unit: "hour" },
+  { amount: 7, unit: "day" },
+  { amount: 4.34524, unit: "week" },
+  { amount: 12, unit: "month" },
+  { amount: Number.POSITIVE_INFINITY, unit: "year" },
+];
+
+/**
+ * Localized relative time — "5 minutes ago" / "hace 5 minutos". Uses
+ * `numeric: "auto"`, so a one-day gap reads "yesterday" rather than "1 day ago".
+ *
+ * `now` is a parameter, not a `Date.now()` read, for two reasons: it keeps the
+ * function pure (and therefore testable), and it lets a caller derive the value
+ * from state so a compiler that memoizes by dependencies cannot freeze the
+ * label (see `useElapsedSince`).
+ */
+export function formatRelativeTime(
+  timeInput: string | Date | number | null | undefined,
+  now: number = Date.now(),
+  locale = "en",
+): string {
+  if (timeInput === null || timeInput === undefined || timeInput === "") {
+    return "";
+  }
+  const date = new Date(timeInput);
+  if (isNaN(date.getTime())) return "";
+
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  let duration = (date.getTime() - now) / 1000;
+  for (const division of RELATIVE_DIVISIONS) {
+    if (Math.abs(duration) < division.amount) {
+      return rtf.format(Math.round(duration), division.unit);
+    }
+    duration /= division.amount;
+  }
+  return "";
+}
+
 /** Format a number with thousands separators and fixed decimals (e.g. "1,234.50"). */
 export function formatDecimal(value: number, decimals = 2): string {
   if (typeof value !== "number" || isNaN(value)) return "0.00";

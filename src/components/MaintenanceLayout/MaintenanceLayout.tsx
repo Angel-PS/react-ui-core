@@ -5,6 +5,10 @@ import { Table, ColumnManager, type TableLabels } from "../Table";
 import { Button } from "../Button";
 import { ConfirmDialog, type ConfirmDialogItemDetail } from "../ConfirmDialog";
 import { MaintenanceFilters, type FilterController } from "../Filters";
+import {
+  TableFreshnessBar,
+  type TableFreshnessLabels,
+} from "../TableFreshnessBar";
 import { applyColumnPrefs } from "../../lib/applyColumnPrefs";
 import type {
   HeaderColumn,
@@ -28,6 +32,8 @@ export interface MaintenanceLayoutLabels {
   edit: string;
   delete: string;
   addNew: string;
+  /** Text for the freshness strip, only used when `refresh` is wired. */
+  refresh: Partial<TableFreshnessLabels>;
   confirmDelete: {
     title: string;
     description: string;
@@ -42,6 +48,9 @@ const DEFAULT_LABELS: MaintenanceLayoutLabels = {
   edit: "Edit",
   delete: "Delete",
   addNew: "Add new",
+  // Left empty so <TableFreshnessBar> keeps its own English defaults; a
+  // consumer overrides individual strings without restating the whole set.
+  refresh: {},
   confirmDelete: {
     title: "Delete record",
     description: "This action cannot be undone.",
@@ -57,6 +66,7 @@ const mergeLabels = (
   ...DEFAULT_LABELS,
   ...labels,
   confirmDelete: { ...DEFAULT_LABELS.confirmDelete, ...labels?.confirmDelete },
+  refresh: { ...DEFAULT_LABELS.refresh, ...labels?.refresh },
 });
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -98,6 +108,21 @@ type BaseMaintenanceLayoutProps = {
   columnPref?: TableColumnPref;
   /** Called when the user applies a new column layout — persist it and feed it back via `columnPref`. */
   onColumnChange?: (next: TableColumnPref) => void;
+  /**
+   * Wire the list's fetch state to render the freshness strip above the table:
+   * when the rows were last read, plus the control that reads them again.
+   * Deliberately plain props — the library knows nothing about your data layer.
+   */
+  refresh?: {
+    /** Epoch ms of the last successful fetch. */
+    updatedAt?: number;
+    isRefreshing?: boolean;
+    onRefresh: () => void;
+    /** BCP-47 tag for the relative label. Default "en". */
+    locale?: string;
+    /** IANA zone for the absolute tooltip. Omit for the viewer's own zone. */
+    timeZone?: string;
+  };
 
   // ── Decoupling props ──
   /** Replaces router navigation. Page mode calls this with the resolved path. */
@@ -180,6 +205,7 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
   onSearchChange,
   onPageChange,
   onPageSizeChange,
+  refresh,
 }) => {
   const [showCreate, setShowCreate] = useState(defaultShowCreate && canCreate);
   const [editId, setEditId] = useState<number | string | null>(null);
@@ -365,7 +391,20 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
             actions={actions}
             expandFields={expandFields}
             metadata={metadata}
-            isLoading={isLoading}
+            isLoading={isLoading && !refresh?.isRefreshing}
+            isRefreshing={refresh?.isRefreshing}
+            toolbar={
+              refresh ? (
+                <TableFreshnessBar
+                  updatedAt={refresh.updatedAt}
+                  isRefreshing={refresh.isRefreshing}
+                  onRefresh={refresh.onRefresh}
+                  locale={refresh.locale}
+                  timeZone={refresh.timeZone}
+                  labels={l.refresh}
+                />
+              ) : undefined
+            }
             sort={sort}
             onSortChange={onSortChange}
             onPageChange={onPageChange}
