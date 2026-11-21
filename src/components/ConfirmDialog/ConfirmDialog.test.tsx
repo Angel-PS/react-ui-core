@@ -45,4 +45,32 @@ describe("ConfirmDialog", () => {
     render(<ConfirmDialog isOpen {...base} isLoading />);
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
   });
+
+  it("is a dialog named by its title and described by its description", () => {
+    render(<ConfirmDialog isOpen {...base} />);
+    const dialog = screen.getByRole("dialog", { name: "Delete?" });
+    expect(dialog).toHaveAccessibleDescription("Are you sure?");
+  });
+
+  it("does not close on Escape while loading", () => {
+    const onCancel = vi.fn();
+    render(<ConfirmDialog isOpen {...base} onCancel={onCancel} isLoading />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("closes on Escape when idle", () => {
+    const onCancel = vi.fn();
+    render(<ConfirmDialog isOpen {...base} onCancel={onCancel} />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the close (X) button as type=button", () => {
+    render(<ConfirmDialog isOpen {...base} closeLabel="Cerrar" />);
+    expect(screen.getByRole("button", { name: "Cerrar" })).toHaveAttribute(
+      "type",
+      "button",
+    );
+  });
 });

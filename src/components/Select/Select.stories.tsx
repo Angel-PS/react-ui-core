@@ -34,3 +34,13 @@ export const Cargando: Story = {
   name: "Estado de carga",
   args: { label: "Sucursal", options, loading: true },
 };
+
+export const ConHint: Story = {
+  name: "Con hint",
+  args: {
+    label: "Sucursal",
+    name: "branch",
+    options,
+    hint: "La sucursal que emite los comprobantes.",
+  },
+};

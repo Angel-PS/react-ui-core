@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { createRef } from 'react';
 import { InputCheckbox, InputToggle } from './InputCheckbox';
 
 describe('InputCheckbox', () => {
@@ -65,6 +66,45 @@ describe('InputCheckbox', () => {
       fireEvent.click(screen.getByRole('checkbox'));
       expect(onChange).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('InputCheckbox — indeterminate y compact', () => {
+  it('fija la propiedad DOM indeterminate (no existe como atributo HTML)', () => {
+    const { rerender } = render(<InputCheckbox id="all" label="Todos" indeterminate />);
+    const input = screen.getByRole('checkbox') as HTMLInputElement;
+    expect(input.indeterminate).toBe(true);
+    expect(input).toBePartiallyChecked();
+    rerender(<InputCheckbox id="all" label="Todos" indeterminate={false} />);
+    expect(input.indeterminate).toBe(false);
+  });
+
+  it('sigue reenviando el ref del consumidor', () => {
+    const ref = createRef<HTMLInputElement>();
+    render(<InputCheckbox id="cb" ref={ref} indeterminate />);
+    expect(ref.current).toBe(screen.getByRole('checkbox'));
+  });
+
+  it('acepta un ref callback', () => {
+    let node: HTMLInputElement | null = null;
+    render(<InputCheckbox id="cb" ref={(n) => { node = n; }} />);
+    expect(node).toBe(screen.getByRole('checkbox'));
+  });
+
+  it('compact usa la caja de 18px (round-sm)', () => {
+    const { container } = render(<InputCheckbox id="cb" compact label="Columna" />);
+    expect(container.querySelector('.round')).toHaveClass('round-sm');
+  });
+
+  it('compact sin label no deja un label de texto vacío', () => {
+    const { container } = render(<InputCheckbox id="cb" compact />);
+    // only the decorative box label remains
+    expect(container.querySelectorAll('label')).toHaveLength(1);
+  });
+
+  it('sin compact usa la caja normal', () => {
+    const { container } = render(<InputCheckbox id="cb" />);
+    expect(container.querySelector('.round')).not.toHaveClass('round-sm');
   });
 });
 

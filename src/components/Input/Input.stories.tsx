@@ -128,3 +128,47 @@ export const Interactivo: Story = {
     required: true,
   },
 };
+
+export const ConHint: Story = {
+  name: 'Con hint',
+  args: {
+    name: 'maxAgeDays',
+    label: 'Caducidad (días)',
+    type: 'number',
+    hint: '0 desactiva la caducidad.',
+  },
+};
+
+export const ConHintYError: Story = {
+  name: 'Con hint y error',
+  args: {
+    name: 'maxAgeDays',
+    label: 'Caducidad (días)',
+    type: 'number',
+    hint: '0 desactiva la caducidad.',
+    error: 'Debe ser 365 o menos',
+  },
+};
+
+export const SoloDigitos: Story = {
+  name: 'Solo dígitos (digitsOnly)',
+  args: {
+    name: 'rnc',
+    label: 'RNC',
+    digitsOnly: true,
+    inputMode: 'numeric',
+    placeholder: 'Escribe 1-31-45502-6',
+  },
+};
+
+export const NumeroConMinimo: Story = {
+  name: 'Número con mínimo (se aplica al salir)',
+  args: {
+    name: 'trialDays',
+    label: 'Días de prueba',
+    type: 'number',
+    minValue: 0,
+    maxValue: 90,
+    hint: 'Se puede escribir 0 y 0.5; vaciar el campo lo deja vacío.',
+  },
+};

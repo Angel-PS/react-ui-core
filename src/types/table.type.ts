@@ -16,6 +16,12 @@ export interface HeaderColumn {
    * manager. Use for identity/total columns a list is meaningless without.
    */
   locked?: boolean;
+  /**
+   * Optional column — starts hidden until the user switches it on in the column
+   * manager (and comes back hidden on "Restore defaults"). For extra fields the
+   * table can show but does not by default.
+   */
+  defaultHidden?: boolean;
 }
 
 export interface Column {
@@ -34,6 +40,12 @@ export interface Column {
     | "status"
     | "avatar";
   subValue?: string | number;
+  /**
+   * A compact node drawn right after a `status` badge, in the same cell (e.g. a
+   * delivery chip next to a document status). Presentational only: `value`
+   * keeps the raw status, because row actions read it back.
+   */
+  adornment?: ReactNode;
 }
 
 export interface ExpandField {

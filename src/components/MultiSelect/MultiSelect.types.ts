@@ -1,6 +1,22 @@
 import { Option } from "@/types";
 import { LegacyRef } from "react";
 
+/** Every user-facing string MultiSelect renders. English by default. */
+export interface MultiSelectLabels {
+  /** Shown when nothing is selected and no `placeholder` prop is passed. */
+  placeholder: string;
+  /** Placeholder of the search box inside the dropdown. */
+  search: string;
+  /** Empty dropdown (no options at all). */
+  noOptions: string;
+  /** Empty dropdown after filtering by the search term. */
+  noResults: string;
+  /** Summary shown instead of chips once more than `maxSelectedDisplay` are picked. */
+  selectedCount: (count: number) => string;
+  /** Accessible name of a chip's remove (x) button. */
+  removeItem: (label: string) => string;
+}
+
 export interface MultiSelectProps {
   label: string;
   name?: string;
@@ -17,10 +33,18 @@ export interface MultiSelectProps {
   color?: string;
   maxSelectedDisplay?: number;
   required?: boolean;
+  /** Override any of the English default strings. */
+  labels?: Partial<MultiSelectLabels>;
 }
 
 export interface MultiSelectTriggerProps {
   triggerRef: LegacyRef<HTMLDivElement> | undefined;
+  /** Id of the visible label, for `aria-labelledby`. */
+  labelId?: string;
+  /** Id of the error message, for `aria-describedby`. */
+  errorId?: string;
+  invalid?: boolean;
+  removeItemLabel: (label: string) => string;
   selectClass: string;
   isOpen: boolean;
   disabled: boolean;
@@ -32,6 +56,7 @@ export interface MultiSelectTriggerProps {
 
 export interface MultiSelectDropdownProps {
   portalRef: LegacyRef<HTMLDivElement> | undefined;
+  labels: Pick<MultiSelectLabels, "search" | "noOptions" | "noResults">;
   searchTerm: string;
   filteredOptions: Option[];
   selectedIds: (string | number)[];

@@ -21,6 +21,39 @@ Importa los estilos globales una sola vez en el punto de entrada de tu aplicaci�
 import '@angelps/react-ui-core/styles';
 ```
 
+`/styles` es el CSS ya compilado. Si tu app usa Tailwind v4 y quieres compartir los tokens (y que tus propias clases `bg-primary-blue-*` funcionen), importa el tema crudo y deja que tu Tailwind escanee el bundle de la librería:
+
+```css
+@import "tailwindcss";
+@import "@angelps/react-ui-core/css";
+@source "../node_modules/@angelps/react-ui-core/dist/**/*.js";
+```
+
+El modo oscuro se activa añadiendo la clase `dark` a `<html>`. Todo texto visible se puede traducir con la prop `labels` de cada componente (los valores por defecto están en inglés).
+
+---
+
+## Novedades en 0.6.0
+
+Sincroniza la librería con las mejoras que `bluepos-client` hizo a sus copias locales y añade componentes nuevos.
+
+**Componentes nuevos:** `SectionHeading`, `FormActions`, `ModalHeader`, `CurrencyInput`, `ColorInput`, `TagInput`, `EmptyState`, `ErrorState`, `Card` + `SettingRow`, `Switch`, `Tabs` + `TabPanel`, `ErrorBoundary` (también como `errorBoundary`/`contentKey` en `AppLayout`), `Sparkline`, `Trend`, `CompanySwitcherDialog`. Hooks nuevos: `useDialogA11y`, `useGlobalHotkey`, `useReducedMotion`. Utilidades nuevas: `normalize`, `formatCompact`, `formatDateIntl`, `formatDateRangeIntl`, `defaultHiddenAccessors`, `resolveHiddenAccessors`, `pickHorizontalAnchor`/`horizontalAnchorFor`/`fixedPopoverPosition`. Clases CSS nuevas: `surface-card`, `surface-card-interactive`, `surface-inset`, `text-2xs`.
+
+**Mejoras en componentes existentes (resumen):** variantes de `Button` (`segment-*`, `segment-brand-*`, `link`, `chip`, `fab`) y `ref`; `Input`/`Select` con `hint`, `aria-invalid`/`aria-describedby` y label asociado al control; `Input` con `digitsOnly`; `InputCheckbox` con `indeterminate`/`compact`; columnas `defaultHidden`, `adornment` en celdas de estado, `subValue` en celdas simples y `timeZone` en `Table`; paneles de `ColumnManager`/filtros que se voltean para no quedar recortados; etiquetas traducibles de paginación, filtros y columnas a través de `MaintenanceLayout`; `loading` en `Sidebar`, `CompanySwitcher` y `UserMenu`; `tone` en las notificaciones; búsqueda sin acentos en `CommandPalette`; estados genéricos nuevos en `statusStyles` y `getStatusStyle(status, overrides)`.
+
+**Cambios de comportamiento (revisa al actualizar):**
+
+1. **`Modal` se renderiza en un portal** dentro de `document.body`. Los tests que buscaban el contenido con `container.querySelector` deben usar `screen`/`document`, y el CSS que dependía de un ancestro ya no aplica. El panel es el elemento `role="dialog"` (conserva la clase `animate-scaleIn`).
+2. **Cierre del `Modal`:** se cierra con un `mousedown` del botón izquierdo sobre el fondo (arrastrar una selección de texto fuera del panel ya no lo cierra). `Escape` cierra solo el diálogo superior y, por defecto, solo si `canClose && hideOnClickOutside`; usa `closeOnEscape` para cambiarlo. `ConfirmDialog` ya no se cierra con `Escape` mientras `isLoading`.
+3. **`Input`/`Select` siempre ponen un `id`** en el control (`id ?? name`): dos campos con el mismo `name` en una página tendrán ids duplicados — pasa `id` explícito en ese caso.
+4. **Números en `Input`:** solo se quitan los ceros a la izquierda redundantes (`0`, `0.5`, `0.` se pueden escribir); `minValue` se aplica al salir del campo y un campo vacío se queda vacío. Los `onInput`/`onBlur`/`onFocus` del consumidor ya no reemplazan a los internos: se ejecutan después.
+5. **Errores en línea:** el mensaje de error de `Input`/`Select`/`MultiSelect` va en el flujo normal con `role="alert"` (desde 0.5.1). Si tu app pintaba su propio error con `role="alert"`, quítalo para no anunciarlo dos veces.
+6. **Columnas:** `applyColumnPrefs` oculta las columnas `defaultHidden` aunque no haya preferencia guardada, y `MaintenanceLayout` aplica preferencias siempre que haya `tableKey`.
+7. **`Pagination`:** las opciones por defecto son `[10, 25, 50, 100, 200]` y un tamaño fuera de la lista aparece como opción propia.
+8. **Barra de filtros:** los filtros en línea quedan a la izquierda y el botón "Filters" a la derecha (`ml-auto`), en vez de repartirse con `justify-between`.
+9. **`MultiSelect`:** los textos por defecto pasan a inglés (`"3 selected"`); pasa `labels` para otro idioma.
+10. **`CompanySwitcher`:** sin compañía activa muestra `labels.noCompany` en vez de "-", y permite elegir aunque solo haya una compañía. **`NewActionMenu`** no se pinta si todos sus grupos están vacíos.
+
 ---
 
 ## Componentes
@@ -105,7 +138,8 @@ const options = [
 | `onChange`           | `(e: { target: { name?, value[] } }) => void` | —                    | Callback cuando cambia la selección                   |
 | `error`              | `string \| null`                           | `null`                  | Mensaje de error                                      |
 | `loading`            | `boolean`                                  | `false`                 | Muestra un skeleton                                   |
-| `placeholder`        | `string`                                   | `"Selecciona una opción"` | Texto cuando no hay selección                       |
+| `placeholder`        | `string`                                   | `labels.placeholder`    | Texto cuando no hay selección                         |
+| `labels`             | `Partial<MultiSelectLabels>`               | inglés                  | Textos (`placeholder`, `search`, `noOptions`, `noResults`, `selectedCount(n)`, `removeItem(label)`) |
 | `disabled`           | `boolean`                                  | `false`                 | Deshabilita el selector                               |
 | `required`           | `boolean`                                  | `false`                 | Muestra asterisco rojo junto al label                 |
 | `color`              | `string`                                   | —                       | Color CSS para el indicador de punto junto al label   |
@@ -182,10 +216,15 @@ const [open, setOpen] = useState(false);
 | `children`           | `ReactNode`       | —           | Contenido del modal (**requerido**)                |
 | `title`              | `string`          | —           | Título que aparece en el header                    |
 | `onHide`             | `() => void`      | —           | Callback para cerrar el modal                      |
-| `hideOnClickOutside` | `boolean`         | `true`      | Cierra el modal al hacer clic en el fondo          |
+| `hideOnClickOutside` | `boolean`         | `true`      | Cierra el modal al presionar sobre el fondo        |
 | `canClose`           | `boolean`         | `true`      | Muestra el botón "×" en el header                  |
+| `closeOnEscape`      | `boolean`         | `canClose && hideOnClickOutside` | Cierra con `Escape` (solo el diálogo superior) |
+| `ariaLabel`          | `string`          | —           | Nombre accesible cuando no hay `title` (p. ej. con `headerContent`) |
+| `ariaDescribedBy`    | `string`          | —           | Id del elemento que describe el diálogo            |
+| `headerContent`      | `ReactNode`       | —           | Header propio (p. ej. `<ModalHeader>`) en lugar del título |
+| `closeLabel` / `dialogLabel` | `string`  | `"Close"` / `"Dialog"` | Textos accesibles del botón × y del diálogo |
 
-> El modal bloquea el scroll del body mientras está abierto y se cierra al presionar `Escape`.
+> El modal se renderiza en un portal en `document.body`, bloquea el scroll del body, atrapa el foco con `Tab` y lo devuelve al cerrar.
 
 #### Ejemplos
 

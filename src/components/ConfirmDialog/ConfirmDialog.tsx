@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTriangleExclamation,
@@ -63,6 +64,7 @@ export const ConfirmDialog = ({
   warningFooter,
   closeLabel = "Close",
 }: ConfirmDialogProps) => {
+  const descriptionId = useId();
   if (!isOpen) return null;
 
   const styles = VARIANT_STYLES[variant];
@@ -75,9 +77,13 @@ export const ConfirmDialog = ({
       hideOnClickOutside={!isLoading}
       canClose={!isLoading}
       headerContent={null}
+      // The heading lives in the body, so the dialog needs an explicit name.
+      ariaLabel={title}
+      ariaDescribedBy={descriptionId}
     >
       {!isLoading && (
         <button
+          type="button"
           onClick={onCancel}
           className="absolute top-3 right-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-gray-400 dark:text-slate-500 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 focus:outline-none"
           aria-label={closeLabel}
@@ -97,7 +103,10 @@ export const ConfirmDialog = ({
           <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
             {title}
           </h2>
-          <p className="text-description-helper mt-1.5 text-sm">
+          <p
+            id={descriptionId}
+            className="text-description-helper mt-1.5 text-sm"
+          >
             {description}
           </p>
         </div>

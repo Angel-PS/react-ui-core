@@ -31,7 +31,19 @@ export interface PaginationProps {
   labels?: Partial<PaginationLabels>;
 }
 
-const DEFAULT_ROWS_PER_PAGE_OPTIONS = [25, 50, 100, 200];
+// 10 is the page size most list APIs use when the client sends none, so it has
+// to be an option or the select would show "25" for it.
+const DEFAULT_ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 200];
+
+/**
+ * The options the page-size select renders. A current size outside the list
+ * (30, say) must not make the select lie: it is added in its sorted place so the
+ * select always shows the real page size.
+ */
+const withCurrentSize = (options: number[], size: number): number[] =>
+  options.includes(size) || !Number.isFinite(size)
+    ? options
+    : [...options, size].sort((a, b) => a - b);
 
 const getPageRange = (
   current: number,
@@ -83,6 +95,7 @@ export const Pagination: FC<PaginationProps> = ({
   };
 
   const pageRange = getPageRange(safePage, totalPages);
+  const sizeOptions = withCurrentSize(rowsPerPageOptions, rowsPerPage);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3">
@@ -94,7 +107,7 @@ export const Pagination: FC<PaginationProps> = ({
           className="h-8! cursor-pointer rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2! py-0! text-xs text-slate-600 dark:text-slate-300 shadow-xs transition-colors hover:border-slate-300 focus:border-primary-blue-default focus:outline-none"
           aria-label={l.rowsPerPage}
         >
-          {rowsPerPageOptions.map((option) => (
+          {sizeOptions.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>

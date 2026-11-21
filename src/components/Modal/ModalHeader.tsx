@@ -5,6 +5,7 @@ import type { ModalHeaderProps } from "./Modal.types";
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({
   title,
+  titleId,
   canClose,
   onHide,
   closeLabel = "Close",
@@ -12,14 +13,19 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
   if (!title && !onHide) return null;
 
   return (
-    <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 px-6 py-5">
+    <div className="flex shrink-0 items-center justify-between border-b border-gray-100 dark:border-slate-800 px-6 py-5">
       {title && (
-        <h2 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-slate-100">
+        <h2
+          id={titleId}
+          className="text-xl font-semibold tracking-tight text-gray-900 dark:text-slate-100"
+        >
           {title}
         </h2>
       )}
       {canClose && onHide && (
         <button
+          // Never a submit: a Modal often wraps a <form>.
+          type="button"
           onClick={onHide}
           className="-mr-1.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-gray-400 dark:text-slate-500 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-600 dark:hover:text-slate-300 focus-visible:ring-2 focus-visible:ring-primary-blue-light focus:outline-none"
           aria-label={closeLabel}

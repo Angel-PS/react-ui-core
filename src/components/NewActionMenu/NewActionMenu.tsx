@@ -31,7 +31,11 @@ export interface NewActionMenuLabels {
 }
 
 export interface NewActionMenuProps {
-  /** Columns of quick-create actions (rendered side by side). */
+  /**
+   * Columns of quick-create actions (rendered side by side). Groups left with
+   * no items (e.g. after permission filtering) are dropped, and the menu
+   * renders nothing at all when no group has an item.
+   */
   groups: NewActionGroup[];
   /** Called with an option's `path` when selected. */
   onSelect: (path: string) => void;
@@ -117,12 +121,16 @@ const OptionRow = ({
  * `<a href>` and call `onSelect(path)` on click.
  */
 export const NewActionMenu = ({
-  groups,
+  groups: allGroups,
   onSelect,
   labels,
 }: NewActionMenuProps) => {
   const l = { ...DEFAULT_LABELS, ...labels };
   const [open, setOpen] = useState(false);
+  // A permission-filtered group can end up empty; an empty column is just a
+  // heading over nothing.
+  const groups = allGroups.filter((group) => group.items.length > 0);
+  const isSingle = groups.length === 1;
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false));
 
   useEffect(() => {
@@ -138,6 +146,8 @@ export const NewActionMenu = ({
     setOpen(false);
     if (path) onSelect(path);
   };
+
+  if (groups.length === 0) return null;
 
   return (
     <div ref={ref} className="relative hidden sm:block">
@@ -159,13 +169,22 @@ export const NewActionMenu = ({
       {open && (
         <div
           role="menu"
-          className="animate-fadeIn absolute top-[calc(100%+8px)] right-0 z-50 w-[520px] max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/10"
+          className={cn(
+            "animate-fadeIn absolute top-[calc(100%+8px)] right-0 z-50 max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/10",
+            // One column needs half the room; a 520px panel would leave it
+            // floating in empty space.
+            isSingle ? "w-70" : "w-[520px]",
+          )}
         >
           <div
             className="grid"
-            style={{
-              gridTemplateColumns: `repeat(${groups.length}, minmax(0, 1fr))`,
-            }}
+            style={
+              isSingle
+                ? undefined
+                : {
+                    gridTemplateColumns: `repeat(${groups.length}, minmax(0, 1fr))`,
+                  }
+            }
           >
             {groups.map((group, gi) => (
               <div

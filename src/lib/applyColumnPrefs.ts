@@ -1,13 +1,44 @@
 import type { HeaderColumn, TableColumnPref } from "../types";
 
 /**
+ * The accessors hidden by a table's defaults: its optional (`defaultHidden`)
+ * columns, never a pinned one. A table without optional columns has none.
+ */
+export const defaultHiddenAccessors = (catalog: HeaderColumn[]): string[] =>
+  catalog.filter((h) => h.defaultHidden && !h.locked).map((h) => h.accessor);
+
+/**
+ * The hidden set a saved pref resolves to against the live catalog: the pref's
+ * own `hidden` (minus pinned or removed columns), plus any optional column the
+ * pref has never seen — a `defaultHidden` column shipped after the user saved
+ * their layout starts hidden like it would for everyone else. Without a pref,
+ * the table's defaults.
+ */
+export const resolveHiddenAccessors = (
+  catalog: HeaderColumn[],
+  pref?: TableColumnPref,
+): string[] => {
+  if (!pref) return defaultHiddenAccessors(catalog);
+  const byAccessor = new Map(catalog.map((h) => [h.accessor, h]));
+  const known = new Set(pref.order);
+  const hidden = new Set(
+    pref.hidden.filter((a) => byAccessor.has(a) && !byAccessor.get(a)?.locked),
+  );
+  for (const accessor of defaultHiddenAccessors(catalog)) {
+    if (!known.has(accessor)) hidden.add(accessor);
+  }
+  return [...hidden];
+};
+
+/**
  * Apply a user's saved column preference to a table's full column catalog,
  * producing the headers actually rendered (reordered + visible only).
  *
  * Forward-compatible by design:
  * - Columns shipped in a future release (present in `catalog`, absent from the
  *   saved `order`) are appended in catalog order, so they appear by default
- *   instead of silently disappearing.
+ *   instead of silently disappearing — unless they are optional
+ *   (`defaultHidden`), which start hidden.
  * - Accessors in the saved pref that no longer exist in `catalog` (a removed
  *   column) are ignored — no crash, no empty cells.
  * - At least one column is always returned; if a pref would hide everything,
@@ -22,15 +53,12 @@ export function applyColumnPrefs(
   catalog: HeaderColumn[],
   pref?: TableColumnPref,
 ): HeaderColumn[] {
-  if (!pref) return catalog;
-
-  const byAccessor = new Map(catalog.map((h) => [h.accessor, h]));
-  // A locked column can never be hidden, even if a stale pref lists it.
-  const hidden = new Set(pref.hidden.filter((a) => !byAccessor.get(a)?.locked));
+  const hidden = new Set(resolveHiddenAccessors(catalog, pref));
 
   // (a) saved order first…
+  const byAccessor = new Map(catalog.map((h) => [h.accessor, h]));
   const ordered: HeaderColumn[] = [];
-  for (const accessor of pref.order) {
+  for (const accessor of pref?.order ?? []) {
     const header = byAccessor.get(accessor);
     if (header) {
       ordered.push(header);

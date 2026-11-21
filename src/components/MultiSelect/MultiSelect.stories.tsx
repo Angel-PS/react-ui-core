@@ -124,3 +124,35 @@ export const Interactivo: Story = {
     required: true,
   },
 };
+
+export const EnEspanol: Story = {
+  name: 'Textos traducidos (labels)',
+  args: {
+    label: 'Frameworks',
+    options: OPTIONS,
+    value: ['react', 'vue', 'svelte', 'astro'],
+    maxSelectedDisplay: 3,
+    labels: {
+      placeholder: 'Selecciona una opción',
+      search: 'Buscar...',
+      noOptions: 'No hay opciones',
+      noResults: 'No se encontraron resultados',
+      selectedCount: (n) => `${n} seleccionados`,
+      removeItem: (l) => `Quitar ${l}`,
+    },
+  },
+};
+
+export const ModoOscuro: Story = {
+  name: 'Modo oscuro',
+  render: (args) => (
+    <div className="dark rounded-xl bg-slate-950 p-6" style={{ maxWidth: 420 }}>
+      <MultiSelect {...args} />
+    </div>
+  ),
+  args: {
+    label: 'Frameworks',
+    options: OPTIONS,
+    value: ['react', 'nextjs'],
+  },
+};

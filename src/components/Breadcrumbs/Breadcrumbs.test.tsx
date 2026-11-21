@@ -44,4 +44,17 @@ describe("Breadcrumbs", () => {
     fireEvent.click(screen.getByText("Products"));
     expect(onNavigate).toHaveBeenCalledWith("/products");
   });
+
+  it("names the navigation landmark itself", () => {
+    render(
+      <Breadcrumbs
+        items={trail}
+        onNavigate={() => {}}
+        labels={{ ariaLabel: "Ruta de navegación" }}
+      />,
+    );
+    const nav = screen.getByRole("navigation", { name: "Ruta de navegación" });
+    expect(nav.tagName).toBe("NAV");
+    expect(nav.parentElement).not.toHaveAttribute("aria-label");
+  });
 });

@@ -126,3 +126,78 @@ export function capitalizeWords(text: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+/**
+ * Short axis/label form of a number: 1250 → "1.3K", 4200000 → "4.2M". Keeps
+ * one decimal only while it still carries information (below 10K / 10M), so a
+ * chart axis stays narrow without going imprecise. Non-finite input → "0".
+ */
+export function formatCompact(value: number): string {
+  if (!Number.isFinite(value)) return "0";
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000)
+    return `${(value / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
+  if (abs >= 1_000) return `${(value / 1_000).toFixed(abs >= 10_000 ? 0 : 1)}K`;
+  return `${Math.round(value)}`;
+}
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A bare "YYYY-MM-DD" is a calendar day, not an instant. */
+const isDateOnly = (input: string | Date): boolean =>
+  typeof input === "string" && DATE_ONLY.test(input);
+
+/**
+ * Localized date via `Intl.DateTimeFormat` ("18 abr 2026", "April 18, 2026"…).
+ *
+ * An instant is rendered in `timeZone` (omit for the viewer's local zone). A
+ * bare `YYYY-MM-DD` string is a calendar day: `new Date` would read it as UTC
+ * midnight, which west of UTC is the previous day, so it is formatted in UTC
+ * and always shows the day as stored. A `timeZone` inside `options` wins over
+ * both. Empty or invalid input → "".
+ */
+export function formatDateIntl(
+  timeInput: string | Date | null | undefined,
+  options?: Intl.DateTimeFormatOptions,
+  locale = "en",
+  timeZone?: string,
+): string {
+  if (!timeInput) return "";
+  const date = new Date(timeInput);
+  if (isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: isDateOnly(timeInput) ? "UTC" : timeZone,
+    ...options,
+  }).format(date);
+}
+
+type RangeCapableFormat = Intl.DateTimeFormat & {
+  formatRange?: (start: Date, end: Date) => string;
+};
+
+/**
+ * Localized date range via `Intl.DateTimeFormat#formatRange`
+ * ("Oct 1 – 15, 2026", "1–15 oct 2026"), which merges the shared parts. Same
+ * anchoring as {@link formatDateIntl}: two bare `YYYY-MM-DD` days keep their
+ * calendar days; otherwise both ends are read in `timeZone` (local when
+ * omitted). Falls back to "start – end" where `formatRange` is unavailable.
+ * An invalid end (or start) → "" rather than a throw.
+ */
+export function formatDateRangeIntl(
+  from: string | Date,
+  to: string | Date,
+  options?: Intl.DateTimeFormatOptions,
+  locale = "en",
+  timeZone?: string,
+): string {
+  const start = new Date(from);
+  const end = new Date(to);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+  const fmt: RangeCapableFormat = new Intl.DateTimeFormat(locale, {
+    timeZone: isDateOnly(from) && isDateOnly(to) ? "UTC" : timeZone,
+    ...options,
+  });
+  return typeof fmt.formatRange === "function"
+    ? fmt.formatRange(start, end)
+    : `${fmt.format(start)} – ${fmt.format(end)}`;
+}

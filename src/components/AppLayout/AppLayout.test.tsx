@@ -52,4 +52,66 @@ describe("AppLayout", () => {
     );
     expect(screen.queryByTestId("navbar")).not.toBeInTheDocument();
   });
+
+  describe("errorBoundary", () => {
+    const Boom = ({ explode }: { explode: boolean }) => {
+      if (explode) throw new Error("page crash");
+      return <p>Page ok</p>;
+    };
+    let errorSpy: ReturnType<typeof vi.spyOn>;
+    beforeEach(() => {
+      errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    });
+    afterEach(() => errorSpy.mockRestore());
+
+    it("keeps the shell when the page crashes", () => {
+      render(
+        <AppLayout sidebar={() => <aside data-testid="sidebar" />} errorBoundary>
+          <Boom explode />
+        </AppLayout>,
+      );
+      expect(screen.getByTestId("sidebar")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Something went wrong");
+    });
+
+    it("forwards boundary props (labels, onError)", () => {
+      const onError = vi.fn();
+      render(
+        <AppLayout
+          sidebar={() => <aside />}
+          errorBoundary={{ onError, labels: { title: "Algo salió mal" } }}
+        >
+          <Boom explode />
+        </AppLayout>,
+      );
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole("alert")).toHaveTextContent("Algo salió mal");
+    });
+
+    it("recovers when contentKey changes", () => {
+      const { rerender } = render(
+        <AppLayout sidebar={() => <aside />} errorBoundary contentKey="/broken">
+          <Boom explode />
+        </AppLayout>,
+      );
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      rerender(
+        <AppLayout sidebar={() => <aside />} errorBoundary contentKey="/home">
+          <Boom explode={false} />
+        </AppLayout>,
+      );
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.getByText("Page ok")).toBeInTheDocument();
+    });
+
+    it("lets errors propagate when errorBoundary is off", () => {
+      expect(() =>
+        render(
+          <AppLayout sidebar={() => <aside />}>
+            <Boom explode />
+          </AppLayout>,
+        ),
+      ).toThrow("page crash");
+    });
+  });
 });

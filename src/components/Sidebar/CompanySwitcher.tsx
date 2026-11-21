@@ -13,6 +13,9 @@ import type {
 const DEFAULT_LABELS: CompanySwitcherLabels = {
   switchCompany: "Switch company",
   yourCompanies: "Your companies",
+  noCompany: "Select company",
+  noCompanyAvailable: "No company",
+  noCompanyHint: "",
 };
 
 const mergeLabels = (
@@ -31,18 +34,52 @@ export const CompanySwitcher = ({
   canSwitch,
   onSelectCompany,
   isCollapsed = false,
+  loading = false,
   labels,
 }: CompanySwitcherProps) => {
   const l = mergeLabels(labels);
   const [isOpen, setIsOpen] = useState(false);
   const ref = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
 
-  const switchable = canSwitch ?? companies.length > 1;
   const active =
     companies.find((c) => c.id === activeCompany?.id) ?? activeCompany ?? null;
-  const displayName = active?.primaryLabel || active?.secondaryLabel || "-";
-  const displaySecondary = active?.secondaryLabel || "-";
+  // With a company active there must be another one to switch to; with none
+  // active, any single company is a valid pick (otherwise a user left without
+  // an active tenant gets an inert chip — the one way back).
+  const switchable = canSwitch ?? companies.length > (active ? 1 : 0);
+  const displayName = active
+    ? active.primaryLabel || active.secondaryLabel || "-"
+    : switchable
+      ? l.noCompany
+      : l.noCompanyAvailable;
+  const displaySecondary = active
+    ? active.secondaryLabel || "-"
+    : l.noCompanyHint;
   const initials = getInitials(displayName);
+
+  if (loading) {
+    return isCollapsed ? (
+      <div
+        aria-busy="true"
+        data-testid="company-switcher-skeleton"
+        className="mx-auto grid h-10 w-10 place-items-center"
+      >
+        <span className="h-7 w-7 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700" />
+      </div>
+    ) : (
+      <div
+        aria-busy="true"
+        data-testid="company-switcher-skeleton"
+        className="flex w-full items-center gap-2.5 rounded-lg border border-gray-200 px-3 py-2 dark:border-slate-800"
+      >
+        <span className="h-7 w-7 shrink-0 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700" />
+        <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <span className="h-3 w-28 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
+          <span className="h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
+        </span>
+      </div>
+    );
+  }
 
   const handleSelect = (company: CompanyOption) => {
     setIsOpen(false);

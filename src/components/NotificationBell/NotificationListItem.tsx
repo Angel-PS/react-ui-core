@@ -1,17 +1,26 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "../../lib/utils";
-import type { NotificationListItemProps } from "./NotificationBell.types";
+import type {
+  NotificationListItemLabels,
+  NotificationListItemProps,
+} from "./NotificationBell.types";
+import { getNotificationToneStyle } from "./notificationTones";
+
+const DEFAULT_LABELS: NotificationListItemLabels = { unread: "Unread" };
 
 /**
  * A single row inside the notification panel. Unread rows get a tinted
- * background and a dot. Presentational — clicking calls `onClick(notification)`.
+ * background, a bolder title and a dot; `notification.tone` picks the icon and
+ * colors. Presentational — clicking calls `onClick(notification)`.
  */
 export const NotificationListItem = ({
   notification,
   onClick,
+  labels,
 }: NotificationListItemProps) => {
+  const l = { ...DEFAULT_LABELS, ...labels };
   const unread = !notification.read;
+  const tone = getNotificationToneStyle(notification.tone);
   return (
     <button
       type="button"
@@ -21,16 +30,31 @@ export const NotificationListItem = ({
         unread && "bg-primary-blue-lightest/60",
       )}
     >
-      <span className="bg-primary-blue-lightest text-primary-blue-default mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[12px]">
-        <FontAwesomeIcon icon={notification.icon ?? faBell} />
+      <span
+        className={cn(
+          "mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[12px]",
+          tone.iconBox,
+        )}
+      >
+        <FontAwesomeIcon icon={notification.icon ?? tone.icon} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="block flex-1 truncate text-[13px] font-semibold text-gray-800 dark:text-slate-100">
+          <span
+            className={cn(
+              "block flex-1 truncate text-[13px] text-gray-800 dark:text-slate-100",
+              unread ? "font-semibold" : "font-medium",
+            )}
+          >
             {notification.title}
           </span>
           {unread && (
-            <span className="bg-primary-blue-default mt-1 h-2 w-2 shrink-0 rounded-full" />
+            <span
+              role="img"
+              title={l.unread}
+              aria-label={l.unread}
+              className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", tone.dot)}
+            />
           )}
         </span>
         {notification.body && (

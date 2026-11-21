@@ -15,6 +15,9 @@ export interface UserMenuLabels {
   userMenu: string;
 }
 
+/** Breakpoint from which the name + username show next to the avatar. */
+export type UserMenuNameBreakpoint = "sm" | "md" | "lg" | "xl";
+
 export interface UserMenuProps {
   fullName: string;
   username: string;
@@ -22,10 +25,43 @@ export interface UserMenuProps {
   initials?: string;
   /** Menu rows (e.g. Settings, Logout). The consumer wires navigation/logout. */
   items: UserMenuItem[];
+  /**
+   * Show a skeleton while the profile loads, instead of rendering a fallback
+   * name (e.g. "Unknown Unknown") that then flips to the real one.
+   */
+  loading?: boolean;
+  /**
+   * From which breakpoint the name + username show beside the avatar. Below it
+   * only the avatar stays (the button's aria-label still names the menu).
+   * Default `"sm"`. Use `"xl"` when the navbar is crowded at tablet widths.
+   */
+  nameBreakpoint?: UserMenuNameBreakpoint;
   labels?: Partial<UserMenuLabels>;
 }
 
 const DEFAULT_LABELS: UserMenuLabels = { userMenu: "User menu" };
+
+// Literal class strings — Tailwind v4 only emits classes it can see verbatim.
+const NAME_VISIBLE: Record<UserMenuNameBreakpoint, string> = {
+  sm: "hidden text-right sm:block",
+  md: "hidden text-right md:block",
+  lg: "hidden text-right lg:block",
+  xl: "hidden text-right xl:block",
+};
+const SKELETON_NAME_VISIBLE: Record<UserMenuNameBreakpoint, string> = {
+  sm: "hidden flex-col items-end gap-1.5 py-1 sm:flex",
+  md: "hidden flex-col items-end gap-1.5 py-1 md:flex",
+  lg: "hidden flex-col items-end gap-1.5 py-1 lg:flex",
+  xl: "hidden flex-col items-end gap-1.5 py-1 xl:flex",
+};
+// The button's left padding only matters next to the name; avatar-only gets a
+// symmetric 1.
+const BUTTON_PAD_LEFT: Record<UserMenuNameBreakpoint, string> = {
+  sm: "pl-1 sm:pl-2",
+  md: "pl-1 md:pl-2",
+  lg: "pl-1 lg:pl-2",
+  xl: "pl-1 xl:pl-2",
+};
 
 /**
  * Navbar user/profile menu: avatar + name button that opens a dropdown of
@@ -37,12 +73,30 @@ export const UserMenu = ({
   username,
   initials,
   items,
+  loading = false,
+  nameBreakpoint = "sm",
   labels,
 }: UserMenuProps) => {
   const l = { ...DEFAULT_LABELS, ...labels };
   const [showMenu, setShowMenu] = useState(false);
   const ref = useClickOutside<HTMLDivElement>(() => setShowMenu(false));
   const avatar = initials ?? getInitials(fullName);
+
+  if (loading) {
+    return (
+      <div
+        aria-busy="true"
+        aria-label={l.userMenu}
+        className="flex items-center gap-3 border-l border-gray-200 pl-2 md:pl-4 lg:pl-6 dark:border-slate-800"
+      >
+        <span className={SKELETON_NAME_VISIBLE[nameBreakpoint]}>
+          <span className="block h-3.5 w-24 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
+          <span className="block h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
+        </span>
+        <span className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-gray-200 ring-2 ring-white dark:bg-slate-700 dark:ring-slate-900" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -55,9 +109,12 @@ export const UserMenu = ({
         aria-haspopup="menu"
         aria-expanded={showMenu}
         aria-label={l.userMenu}
-        className="focus-visible:ring-primary-blue-light flex cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-2 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-800"
+        className={cn(
+          "focus-visible:ring-primary-blue-light flex cursor-pointer items-center gap-3 rounded-full py-1 pr-1 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:outline-none dark:hover:bg-slate-800",
+          BUTTON_PAD_LEFT[nameBreakpoint],
+        )}
       >
-        <span className="hidden text-right sm:block">
+        <span className={NAME_VISIBLE[nameBreakpoint]}>
           <span className="block truncate text-sm font-semibold text-gray-800 dark:text-slate-100">
             {fullName}
           </span>
