@@ -1,4 +1,4 @@
-import { Button } from "../Button";
+import { Button, type ButtonProps } from "../Button";
 import { cn } from "../../lib/utils";
 
 export interface FormActionsLabels {
@@ -20,6 +20,23 @@ export interface FormActionsProps {
   isEdit?: boolean;
   /** While true the submit button is disabled and shows a spinner. */
   isPending?: boolean;
+  /**
+   * Disable the submit button without a spinner, e.g. a settings form with no
+   * unsaved changes. (While `isPending` it is disabled regardless.)
+   */
+  submitDisabled?: boolean;
+  /** Disable Cancel, e.g. while a save is in flight. Default `false`. */
+  cancelDisabled?: boolean;
+  /**
+   * Cancel button style. Default `"cancel"` (red). Use `"classic"` for a
+   * neutral Cancel when red would read as destructive.
+   */
+  cancelVariant?: ButtonProps["variant"];
+  /**
+   * Submit text that overrides `labels.create`/`labels.update`, for forms
+   * where neither verb fits (e.g. "Save", "Send invite").
+   */
+  submitLabel?: string;
   className?: string;
   /** Button text. Shallow-merged over the English defaults. */
   labels?: Partial<FormActionsLabels>;
@@ -33,17 +50,31 @@ export const FormActions = ({
   onCancel,
   isEdit = false,
   isPending = false,
+  submitDisabled = false,
+  cancelDisabled = false,
+  cancelVariant = "cancel",
+  submitLabel,
   className,
   labels,
 }: FormActionsProps) => {
   const l = { ...DEFAULT_FORM_ACTIONS_LABELS, ...labels };
   return (
     <div className={cn("flex justify-end gap-4", className)}>
-      <Button type="button" variant="cancel" onClick={onCancel}>
+      <Button
+        type="button"
+        variant={cancelVariant}
+        onClick={onCancel}
+        disabled={cancelDisabled}
+      >
         {l.cancel}
       </Button>
-      <Button type="submit" variant="primary" disabled={isPending} loading={isPending}>
-        {isEdit ? l.update : l.create}
+      <Button
+        type="submit"
+        variant="primary"
+        disabled={isPending || submitDisabled}
+        loading={isPending}
+      >
+        {submitLabel ?? (isEdit ? l.update : l.create)}
       </Button>
     </div>
   );

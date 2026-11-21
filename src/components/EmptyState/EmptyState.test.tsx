@@ -33,10 +33,18 @@ describe("EmptyState", () => {
     expect(screen.getByRole("status").className).not.toContain("py-10");
   });
 
-  it("carries the recessed surface in both themes", () => {
+  it("paints the recessed surface with semantic tokens so re-themes apply", () => {
     render(<EmptyState title="Nothing" />);
     const cls = screen.getByRole("status").className;
-    expect(cls).toContain("bg-gray-50");
-    expect(cls).toContain("dark:bg-slate-800");
+    expect(cls).toContain("bg-muted");
+    expect(cls).toContain("border-border/60");
+    expect(cls).not.toMatch(/bg-gray-|slate-/);
+  });
+
+  it("draws no surface with variant='plain'", () => {
+    render(<EmptyState title="Nothing" variant="plain" />);
+    const cls = screen.getByRole("status").className;
+    expect(cls).not.toContain("bg-muted");
+    expect(cls).not.toContain("border");
   });
 });

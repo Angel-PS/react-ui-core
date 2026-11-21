@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   useId,
   useState,
   type ClipboardEvent,
@@ -34,6 +35,11 @@ export interface TagInputProps {
   id?: string;
   name?: string;
   className?: string;
+  /**
+   * Called when the draft input loses focus (after any pending draft is
+   * committed) — lets react-hook-form mark the field as touched.
+   */
+  onBlur?: () => void;
 }
 
 /** Strips separators and whitespace from both ends of a typed tag. */
@@ -55,9 +61,10 @@ const defaultRemoveLabel = (tag: string) => `Remove ${tag}`;
 /**
  * Controlled multi-value "chip" input. Commits on Enter / comma / Tab / blur
  * and splits a pasted list; runs an optional per-tag validation and drops
- * duplicates; Backspace on an empty draft removes the last chip.
+ * duplicates; Backspace on an empty draft removes the last chip. The `ref`
+ * points at the draft input, so a form library can focus the field.
  */
-export const TagInput = ({
+export const TagInput = forwardRef<HTMLInputElement, TagInputProps>(function TagInput({
   value,
   onChange,
   label,
@@ -73,7 +80,8 @@ export const TagInput = ({
   id,
   name,
   className,
-}: TagInputProps) => {
+  onBlur,
+}, ref) {
   const [draft, setDraft] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -190,6 +198,7 @@ export const TagInput = ({
           </span>
         ))}
         <input
+          ref={ref}
           id={controlId}
           name={name}
           type={type}
@@ -206,7 +215,10 @@ export const TagInput = ({
           }}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
-          onBlur={() => commit(draft)}
+          onBlur={() => {
+            commit(draft);
+            onBlur?.();
+          }}
           className="min-w-40 flex-1 border-0 bg-transparent py-0.5 text-sm text-slate-700 placeholder-slate-400 outline-none disabled:cursor-not-allowed disabled:text-gray-400 dark:text-slate-200 dark:placeholder-slate-500 dark:disabled:text-slate-500"
         />
       </div>
@@ -226,6 +238,6 @@ export const TagInput = ({
       )}
     </div>
   );
-};
+});
 
 export default TagInput;

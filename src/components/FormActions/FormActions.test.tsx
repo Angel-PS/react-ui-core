@@ -43,6 +43,25 @@ describe("FormActions", () => {
     expect(screen.getByRole("button", { name: "Guardar" })).toBeInTheDocument();
   });
 
+  it("disables submit without a spinner via submitDisabled", () => {
+    render(<FormActions submitDisabled />);
+    const submit = screen.getByRole("button", { name: "Create" });
+    expect(submit).toBeDisabled();
+    expect(submit).not.toHaveAttribute("aria-busy", "true");
+  });
+
+  it("can disable Cancel and give it a neutral style", () => {
+    render(<FormActions cancelDisabled cancelVariant="classic" />);
+    const cancel = screen.getByRole("button", { name: "Cancel" });
+    expect(cancel).toBeDisabled();
+    expect(cancel.className).not.toContain("bg-red-500");
+  });
+
+  it("lets submitLabel override the create/update verb", () => {
+    render(<FormActions isEdit submitLabel="Save" />);
+    expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute("type", "submit");
+  });
+
   it("does not leak 'undefined' into the class list", () => {
     const { container } = render(<FormActions />);
     expect((container.firstElementChild as HTMLElement).className).not.toContain("undefined");

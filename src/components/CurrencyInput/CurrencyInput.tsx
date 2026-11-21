@@ -18,16 +18,26 @@ export interface CurrencyInputProps {
   decimals?: number;
   /** Select the whole value on focus. */
   selectAll?: boolean;
-  /** Typed values below this are clamped up to it. */
+  /**
+   * Values below this are raised to it when the field loses focus (not while
+   * typing, so "0.75" can be typed on the way to a larger number).
+   */
   minValue?: number;
-  /** Typed values above this are clamped down to it. */
+  /** Typed values above this are clamped down to it immediately. */
   maxValue?: number;
   name?: string;
   id?: string;
-  /** The numeric value. `null`/`undefined` renders an empty field. */
+  /**
+   * The numeric value. `null`, `undefined` or `NaN` renders an empty field.
+   */
   value: number | null | undefined;
-  /** Called with the parsed, clamped number on every keystroke. */
-  onChange: (value: number) => void;
+  /**
+   * Called with the parsed number on every keystroke, with `null` when the
+   * field is cleared, and once more on blur when rounding to `decimals` or
+   * `minValue` changes the number — so the form value always equals what the
+   * field shows.
+   */
+  onChange: (value: number | null) => void;
   onBlur?: () => void;
   "aria-describedby"?: string;
 }
@@ -116,8 +126,12 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
 
     // Re-sync from the controlled value only while the field is not being
     // edited, so outside updates (a form reset, a recalculated total) show up
-    // without overwriting what the user is typing.
-    if (!isFocused && (prevValue !== value || prevDecimals !== decimals)) {
+    // without overwriting what the user is typing. `Object.is` — not `!==` —
+    // because `NaN !== NaN` would re-sync on every render and loop forever.
+    if (
+      !isFocused &&
+      (!Object.is(prevValue, value) || prevDecimals !== decimals)
+    ) {
       setPrevValue(value);
       setPrevDecimals(decimals);
       const n = coerceNumeric(value);
@@ -144,7 +158,12 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
       const { numeric, rawText } = parseCurrencyText(e.target.value);
-      const clamped = clampNumber(numeric, minValue, maxValue);
+      if (rawText === "") {
+        setDisplay("");
+        onChange(null);
+        return;
+      }
+      const clamped = clampNumber(numeric, undefined, maxValue);
       onChange(clamped);
       setDisplay(
         formatCurrencyLive(clamped === numeric ? rawText : String(clamped)),
@@ -154,8 +173,22 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
     function handleBlur() {
       setIsFocused(false);
       const coerced = coerceNumeric(value);
-      const numeric = clampNumber(coerced ?? 0, minValue, maxValue);
-      setDisplay(formatDecimal(numeric, decimals));
+      if (coerced == null) {
+        // An empty field stays empty: it is the form's job to say whether a
+        // value is required, not this field's to invent a 0.
+        setDisplay("");
+        onBlur?.();
+        return;
+      }
+      const shown = formatDecimal(
+        clampNumber(coerced, minValue, maxValue),
+        decimals,
+      );
+      // Commit exactly what is displayed, so a 2-decimal rule never fires
+      // under a field that reads "1.01" while the form still holds 1.005.
+      const committed = Number(shown.replace(/,/g, ""));
+      setDisplay(shown);
+      if (!Object.is(committed, coerced)) onChange(committed);
       onBlur?.();
     }
 

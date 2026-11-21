@@ -28,9 +28,23 @@ describe("Trend", () => {
 
   it.each([null, undefined, NaN, Infinity])("renders a neutral dash for %s", (value) => {
     const el = chip(<Trend value={value} />);
-    expect(el.textContent).toBe("—");
+    expect(el.querySelector('[aria-hidden="true"]')?.textContent).toBe("—");
     expect(el).not.toHaveAttribute("data-trend");
     expect(el).toHaveClass("text-gray-500");
+  });
+
+  it("names the dash for screen readers and as a tooltip", () => {
+    const el = chip(<Trend value={null} labels={{ noBaseline: "Sin período anterior" }} />);
+    expect(el).toHaveAttribute("title", "Sin período anterior");
+    expect(el.querySelector(".sr-only")?.textContent).toBe("Sin período anterior");
+  });
+
+  it("drops every color class with tone='inherit' so className decides", () => {
+    const up = chip(<Trend value={4} tone="inherit" className="text-white" />);
+    expect(up.className).not.toMatch(/emerald|red-|dark:text/);
+    expect(up).toHaveClass("text-white");
+    const none = chip(<Trend value={null} tone="inherit" />);
+    expect(none.className).not.toMatch(/gray-|slate-/);
   });
 
   it("hides the suffix with showVs={false}", () => {

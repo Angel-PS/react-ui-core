@@ -54,6 +54,12 @@ Sincroniza la librería con las mejoras que `bluepos-client` hizo a sus copias l
 9. **`MultiSelect`:** los textos por defecto pasan a inglés (`"3 selected"`); pasa `labels` para otro idioma.
 10. **`CompanySwitcher`:** sin compañía activa muestra `labels.noCompany` en vez de "-", y permite elegir aunque solo haya una compañía. **`NewActionMenu`** no se pinta si todos sus grupos están vacíos.
 
+**Notas de los componentes nuevos:**
+
+- `CurrencyInput.onChange` recibe `number | null`: borrar el campo envía `null` y el campo vacío se queda vacío al salir (no se inventa `0.00`). Al salir del campo se envía el valor redondeado a `decimals` (y subido a `minValue`) si cambió, de modo que el formulario siempre tiene lo que se ve. `NaN` se pinta como vacío.
+- `Card`, `SettingRow` y `EmptyState` se pintan con los tokens semánticos (`bg-card`, `border-border`, `text-muted-foreground`, `bg-muted`), así que una app que re-tematiza esos tokens re-tematiza también estos componentes. `Card` tiene `action` (slot a la derecha del header) y `variant="compact"` (tarjeta de dashboard); `EmptyState`/`ErrorState` tienen `variant="plain"` para usarse dentro de una tarjeta, y `ErrorState.onRetry` es opcional.
+- `FormActions` acepta `submitDisabled`, `cancelDisabled`, `cancelVariant` y `submitLabel`. `Trend` acepta `labels.noBaseline` (texto para lectores de pantalla del "—") y `tone="inherit"` para chips sobre superficies de marca. `TagInput` reenvía `ref` y acepta `onBlur` (integración con react-hook-form).
+
 ---
 
 ## Componentes

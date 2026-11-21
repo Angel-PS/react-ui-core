@@ -29,4 +29,17 @@ describe("ErrorState", () => {
     render(<ErrorState message="Falló" onRetry={() => {}} labels={{ retry: "Reintentar" }} />);
     expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
   });
+
+  it("hides the retry button when there is no onRetry", () => {
+    render(<ErrorState message="Could not load" />);
+    expect(screen.getByRole("alert")).toHaveTextContent("Could not load");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("draws no card surface with variant='plain'", () => {
+    render(<ErrorState message="Could not load" variant="plain" />);
+    const cls = screen.getByRole("alert").className;
+    expect(cls).not.toContain("bg-card");
+    expect(cls).not.toContain("border");
+  });
 });

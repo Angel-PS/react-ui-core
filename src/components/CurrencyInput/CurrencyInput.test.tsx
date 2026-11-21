@@ -9,7 +9,10 @@ import {
 import type { CurrencyInputProps } from "./CurrencyInput";
 
 function Controlled(
-  props: Partial<CurrencyInputProps> & { initial?: number | null; spy?: (n: number) => void },
+  props: Partial<CurrencyInputProps> & {
+    initial?: number | null;
+    spy?: (n: number | null) => void;
+  },
 ) {
   const { initial = null, spy, ...rest } = props;
   const [value, setValue] = useState<number | null>(initial);
@@ -92,27 +95,58 @@ describe("CurrencyInput", () => {
     expect(input.value).toBe("100");
   });
 
-  it("clamps below minValue", () => {
+  it("lets a value below minValue be typed and raises it on blur", () => {
     const spy = vi.fn();
     render(<Controlled spy={spy} minValue={1} />);
     const input = screen.getByLabelText("Amount") as HTMLInputElement;
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "0.5" } });
-    expect(spy).toHaveBeenLastCalledWith(1);
+    expect(spy).toHaveBeenLastCalledWith(0.5);
+    expect(input.value).toBe("0.5");
     fireEvent.blur(input);
+    expect(spy).toHaveBeenLastCalledWith(1);
     expect(input.value).toBe("1.00");
   });
 
-  it("an emptied field reports 0 and shows 0.00 after blur", () => {
+  it("an emptied field reports null and stays empty after blur", () => {
     const spy = vi.fn();
     render(<Controlled spy={spy} initial={42} />);
     const input = screen.getByLabelText("Amount") as HTMLInputElement;
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "" } });
-    expect(spy).toHaveBeenLastCalledWith(0);
+    expect(spy).toHaveBeenLastCalledWith(null);
     expect(input.value).toBe("");
+    spy.mockClear();
     fireEvent.blur(input);
-    expect(input.value).toBe("0.00");
+    expect(input.value).toBe("");
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("commits the rounded value on blur so the form equals the display", () => {
+    const spy = vi.fn();
+    render(<Controlled spy={spy} />);
+    const input = screen.getByLabelText("Amount") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "1.239" } });
+    expect(spy).toHaveBeenLastCalledWith(1.239);
+    fireEvent.blur(input);
+    expect(input.value).toBe("1.24");
+    expect(spy).toHaveBeenLastCalledWith(1.24);
+  });
+
+  it("does not call onChange on blur when the value is already exact", () => {
+    const spy = vi.fn();
+    render(<Controlled spy={spy} initial={12.5} />);
+    const input = screen.getByLabelText("Amount") as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.blur(input);
+    expect(spy).not.toHaveBeenCalled();
+    expect(input.value).toBe("12.50");
+  });
+
+  it("renders NaN as an empty field without a render loop", () => {
+    render(<CurrencyInput label="Amount" value={Number.NaN} onChange={() => {}} />);
+    expect((screen.getByLabelText("Amount") as HTMLInputElement).value).toBe("");
   });
 
   it("re-syncs from an outside value change while not focused", () => {

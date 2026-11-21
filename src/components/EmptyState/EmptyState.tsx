@@ -11,12 +11,18 @@ export interface EmptyStateProps {
   action?: ReactNode;
   /** `md` for a page/section, `sm` for a card or popover. */
   size?: "md" | "sm";
+  /**
+   * `inset` (default) draws the recessed surface; `plain` draws only the
+   * content, for use inside a card that already provides the surface.
+   */
+  variant?: "inset" | "plain";
   className?: string;
 }
 
 /**
- * Calm "nothing here yet" panel on a recessed surface. `role="status"` so a
- * list that empties after a filter is announced politely.
+ * Calm "nothing here yet" panel. `role="status"` so a list that empties after
+ * a filter is announced politely. Painted with the semantic tokens (`bg-muted`,
+ * `border-border`, `text-muted-foreground`) so a re-themed app re-themes it.
  */
 export const EmptyState = ({
   icon,
@@ -24,12 +30,14 @@ export const EmptyState = ({
   description,
   action,
   size = "md",
+  variant = "inset",
   className,
 }: EmptyStateProps) => (
   <div
     role="status"
     className={cn(
-      "flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-100 bg-gray-50 text-center dark:border-slate-700 dark:bg-slate-800",
+      "flex flex-col items-center justify-center gap-2 text-center",
+      variant === "inset" && "border-border/60 bg-muted rounded-xl border",
       size === "md" ? "px-6 py-10" : "px-4 py-8",
       className,
     )}
@@ -39,21 +47,21 @@ export const EmptyState = ({
         icon={icon}
         aria-hidden="true"
         className={cn(
-          "text-gray-300 dark:text-slate-600",
+          "text-muted-foreground/50",
           size === "md" ? "text-3xl" : "text-2xl",
         )}
       />
     )}
     <p
       className={cn(
-        "font-semibold text-gray-700 dark:text-slate-300",
+        "text-foreground/80 font-semibold",
         size === "md" ? "text-sm" : "text-[.8125rem]",
       )}
     >
       {title}
     </p>
     {description && (
-      <p className="max-w-[28ch] text-xs leading-relaxed text-gray-500 dark:text-slate-400">
+      <p className="text-muted-foreground max-w-[28ch] text-xs leading-relaxed">
         {description}
       </p>
     )}

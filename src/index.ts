@@ -137,7 +137,7 @@ export type {
 export { SectionHeading } from "./components/SectionHeading";
 export type { SectionHeadingProps } from "./components/SectionHeading";
 export { Card, SettingRow } from "./components/Card";
-export type { CardProps, SettingRowProps } from "./components/Card";
+export type { CardProps, CardVariant, SettingRowProps } from "./components/Card";
 
 // ── App Shell ─────────────────────────────────────────────────────────────────
 export { AppLayout } from "./components/AppLayout";

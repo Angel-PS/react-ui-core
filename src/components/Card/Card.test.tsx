@@ -3,6 +3,37 @@ import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { Card } from "./Card";
 import { SettingRow } from "./SettingRow";
 
+describe("Card — theming, action and compact variant", () => {
+  it("paints with semantic tokens so a re-themed app re-themes it", () => {
+    const { container } = render(<Card title="T">body</Card>);
+    const cls = (container.firstElementChild as HTMLElement).className;
+    expect(cls).toContain("bg-card");
+    expect(cls).toContain("border-border");
+    expect(cls).not.toMatch(/bg-white|border-gray-|slate-/);
+  });
+
+  it("renders the header action slot", () => {
+    render(
+      <Card title="Revenue" action={<button type="button">This month</button>}>
+        body
+      </Card>,
+    );
+    expect(screen.getByRole("button", { name: "This month" })).toBeInTheDocument();
+  });
+
+  it("compact variant: one padded surface, small title, body fills", () => {
+    const { container } = render(
+      <Card variant="compact" title="Sign-ins" description="Last 30 days" action={<span>a</span>}>
+        body
+      </Card>,
+    );
+    const section = container.firstElementChild as HTMLElement;
+    expect(section.className).toContain("p-6");
+    expect(screen.getByRole("heading", { name: "Sign-ins" }).className).toContain("text-sm");
+    expect(screen.getByText("body").className).toContain("flex-1");
+  });
+});
+
 describe("Card", () => {
   it("renders title, description, body and footer", () => {
     render(

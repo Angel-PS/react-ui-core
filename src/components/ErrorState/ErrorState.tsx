@@ -17,21 +17,29 @@ export const DEFAULT_ERROR_STATE_LABELS: ErrorStateLabels = {
 export interface ErrorStateProps {
   /** What failed, in the user's terms. */
   message: string;
-  onRetry: () => void;
+  /** Retry handler. Omit it when there is nothing to retry; the button is hidden. */
+  onRetry?: () => void;
   /** While true the retry button is disabled and shows a spinner. */
   isRetrying?: boolean;
+  /**
+   * `card` (default) draws its own bordered surface; `plain` draws only the
+   * content, for use inside a card that already provides the surface.
+   */
+  variant?: "card" | "plain";
   className?: string;
   labels?: Partial<ErrorStateLabels>;
 }
 
 /**
- * Card for a failed load with a retry action. `role="alert"` so the failure
- * is announced when it replaces the content.
+ * A failed load, optionally with a retry action. `role="alert"` so the failure
+ * is announced when it replaces the content — and so it is never mistaken for
+ * an empty result.
  */
 export const ErrorState = ({
   message,
   onRetry,
   isRetrying = false,
+  variant = "card",
   className,
   labels,
 }: ErrorStateProps) => {
@@ -40,7 +48,10 @@ export const ErrorState = ({
     <div
       role="alert"
       className={cn(
-        "border-border bg-card flex flex-col items-center justify-center gap-3 rounded-2xl border p-8 text-center shadow-sm",
+        "flex flex-col items-center justify-center gap-3 text-center",
+        variant === "card"
+          ? "border-border bg-card rounded-2xl border p-8 shadow-sm"
+          : "py-8",
         className,
       )}
     >
@@ -48,10 +59,12 @@ export const ErrorState = ({
         <FontAwesomeIcon icon={faTriangleExclamation} aria-hidden="true" />
       </span>
       <p className="text-muted-foreground max-w-sm text-sm">{message}</p>
-      <Button variant="secondary" type="button" loading={isRetrying} onClick={onRetry}>
-        {!isRetrying && <FontAwesomeIcon icon={faRotateRight} aria-hidden="true" />}
-        {l.retry}
-      </Button>
+      {onRetry && (
+        <Button variant="secondary" type="button" loading={isRetrying} onClick={onRetry}>
+          {!isRetrying && <FontAwesomeIcon icon={faRotateRight} aria-hidden="true" />}
+          {l.retry}
+        </Button>
+      )}
     </div>
   );
 };

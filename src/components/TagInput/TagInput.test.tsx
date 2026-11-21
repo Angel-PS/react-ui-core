@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { createRef, useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TagInput, cleanTag, splitPastedTags } from "./TagInput";
 import type { TagInputProps } from "./TagInput";
@@ -148,5 +148,28 @@ describe("TagInput", () => {
     );
     expect(input()).toHaveAttribute("aria-describedby", "h-error h-hint");
     expect(screen.getByRole("alert")).toHaveTextContent("At least one URI");
+  });
+  it("forwards its ref to the draft input", () => {
+    const ref = createRef<HTMLInputElement>();
+    render(<TagInput ref={ref} label="Redirect URIs" name="r" value={[]} onChange={() => {}} />);
+    expect(ref.current).toBe(input());
+    ref.current?.focus();
+    expect(document.activeElement).toBe(input());
+  });
+
+  it("calls onBlur after committing the pending draft", () => {
+    const order: string[] = [];
+    render(
+      <TagInput
+        label="Redirect URIs"
+        name="b"
+        value={[]}
+        onChange={(tags) => order.push("change:" + tags.join("|"))}
+        onBlur={() => order.push("blur")}
+      />,
+    );
+    fireEvent.change(input(), { target: { value: "https://a.example" } });
+    fireEvent.blur(input());
+    expect(order).toEqual(["change:https://a.example", "blur"]);
   });
 });

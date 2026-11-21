@@ -34,12 +34,12 @@ export const SettingRow = ({
     <div className="min-w-0 sm:flex-1">
       <label
         htmlFor={htmlFor}
-        className="mb-0 block text-sm font-medium text-gray-800 dark:text-slate-100"
+        className="text-foreground mb-0 block text-sm font-medium"
       >
         {title}
       </label>
       {description && (
-        <p className="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-slate-400">
+        <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
           {description}
         </p>
       )}
