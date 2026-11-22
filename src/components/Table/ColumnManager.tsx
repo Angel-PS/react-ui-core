@@ -4,6 +4,7 @@ import {
   useState,
   type FC,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -19,13 +20,22 @@ import {
 import { Button } from "../Button";
 import { InputCheckbox } from "../InputToggle";
 import { useClickOutside } from "../../hooks";
+import {
+  defaultHiddenAccessors,
+  resolveHiddenAccessors,
+} from "../../lib/applyColumnPrefs";
+import { horizontalAnchorFor, type Anchor } from "../../lib/popoverAlign";
 import { cn } from "../../lib/utils";
 import type { HeaderColumn, TableColumnPref } from "../../types";
 
 export interface ColumnManagerLabels {
   button: string;
   title: string;
-  visibleSummary: (shown: number, total: number) => string;
+  /**
+   * The "N of M shown" line under the title. May return a node, so a
+   * translation can keep the count emphasized (the default bolds it).
+   */
+  visibleSummary: (shown: number, total: number) => ReactNode;
   selectAll: string;
   selectNone: string;
   searchPlaceholder: string;
@@ -45,7 +55,12 @@ export interface ColumnManagerLabels {
 const DEFAULT_COLUMN_MANAGER_LABELS: ColumnManagerLabels = {
   button: "Columns",
   title: "Manage columns",
-  visibleSummary: (shown, total) => `${shown} of ${total} columns shown`,
+  visibleSummary: (shown, total) => (
+    <>
+      <b className="text-primary-blue-default font-bold tabular-nums">{shown}</b>{" "}
+      of {total} columns shown
+    </>
+  ),
   selectAll: "All",
   selectNone: "None",
   searchPlaceholder: "Search columns…",
@@ -63,13 +78,15 @@ const DEFAULT_COLUMN_MANAGER_LABELS: ColumnManagerLabels = {
   done: "Done",
 };
 
-interface ColumnManagerProps {
+export interface ColumnManagerProps {
   /** Full (already translated) column catalog, in the table's natural order. */
   columns: HeaderColumn[];
   /** The user's committed preference for this table, if any. */
   pref?: TableColumnPref;
   /** Commit a new layout. The panel closes itself after calling this. */
   onApply: (next: TableColumnPref) => void;
+  /** Extra classes for the trigger (e.g. to match a toolbar's control height). */
+  triggerClassName?: string;
   labels?: Partial<ColumnManagerLabels>;
 }
 
@@ -100,20 +117,21 @@ const seedOrder = (
 
 type Draft = { order: string[]; hidden: string[] };
 
-const seedDraft = (columns: HeaderColumn[], pref?: TableColumnPref): Draft => {
-  const order = seedOrder(columns, pref);
-  const byAccessor = new Map(columns.map((c) => [c.accessor, c]));
-  // A locked (pinned) column is always visible — never carry it as hidden.
-  const hidden = (pref?.hidden ?? []).filter(
-    (a) => byAccessor.has(a) && !byAccessor.get(a)?.locked,
-  );
-  return { order, hidden };
-};
+/** Keep in sync with the desktop panel's `w-96`. */
+const PANEL_WIDTH = 384;
+
+// A locked (pinned) column is always visible — never carried as hidden — and an
+// optional (`defaultHidden`) column the pref has never seen starts hidden.
+const seedDraft = (columns: HeaderColumn[], pref?: TableColumnPref): Draft => ({
+  order: seedOrder(columns, pref),
+  hidden: resolveHiddenAccessors(columns, pref),
+});
 
 export const ColumnManager: FC<ColumnManagerProps> = ({
   columns,
   pref,
   onApply,
+  triggerClassName,
   labels,
 }) => {
   const l: ColumnManagerLabels = { ...DEFAULT_COLUMN_MANAGER_LABELS, ...labels };
@@ -124,6 +142,7 @@ export const ColumnManager: FC<ColumnManagerProps> = ({
   const [liveMessage, setLiveMessage] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [anchor, setAnchor] = useState<Anchor>("right");
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false));
 
   // Seed the draft from the committed pref each time the panel opens, clear any
@@ -161,8 +180,10 @@ export const ColumnManager: FC<ColumnManagerProps> = ({
     ? orderedRows.filter((c) => String(c.value).toLowerCase().includes(query))
     : orderedRows;
 
-  const committedHiddenCount = (pref?.hidden ?? []).filter(
-    (a) => byAccessor.has(a) && !byAccessor.get(a)?.locked,
+  // The badge counts what the USER hid: an optional column that is merely still
+  // off by default is not news.
+  const committedHiddenCount = resolveHiddenAccessors(columns, pref).filter(
+    (a) => !byAccessor.get(a)?.defaultHidden,
   ).length;
 
   const move = (from: number, to: number) => {
@@ -212,13 +233,24 @@ export const ColumnManager: FC<ColumnManagerProps> = ({
     }));
 
   const handleRestoreDefaults = () => {
-    setDraft({ order: columns.map((c) => c.accessor), hidden: [] });
+    setDraft({
+      order: columns.map((c) => c.accessor),
+      hidden: defaultHiddenAccessors(columns),
+    });
     setSearch("");
   };
 
   const handleApply = () => {
     onApply({ order: draft.order, hidden: draft.hidden });
     setOpen(false);
+  };
+
+  // Measure before opening so the panel is already on the right edge for its
+  // first paint: it flips to the left edge when growing leftward would be
+  // clipped by the nearest overflow container.
+  const handleToggle = () => {
+    if (!open) setAnchor(horizontalAnchorFor(ref.current, PANEL_WIDTH));
+    setOpen((v) => !v);
   };
 
   const handleDrop = (index: number) => {
@@ -439,10 +471,10 @@ export const ColumnManager: FC<ColumnManagerProps> = ({
       <Button
         type="button"
         variant="classic"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="inline-flex items-center gap-2"
+        className={cn("inline-flex items-center gap-2", triggerClassName)}
       >
         <FontAwesomeIcon icon={faTableColumns} className="text-xs" />
         {l.button}
@@ -462,11 +494,15 @@ export const ColumnManager: FC<ColumnManagerProps> = ({
 
       {open && (
         <>
-          {/* Desktop (≥ sm): anchored dropdown under the trigger. */}
+          {/* Desktop (≥ sm): anchored dropdown under the trigger. The anchor
+              flips to the left edge when growing leftward would be clipped. */}
           <div
             role="dialog"
             aria-label={l.title}
-            className="absolute top-[calc(100%+6px)] right-0 z-50 hidden w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:block dark:border-slate-800 dark:bg-slate-900"
+            className={cn(
+              "absolute top-[calc(100%+6px)] z-50 hidden w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:block dark:border-slate-800 dark:bg-slate-900",
+              anchor === "left" ? "left-0" : "right-0",
+            )}
             style={{ animation: "bp-fadein 0.14s ease-out" }}
           >
             {panel}

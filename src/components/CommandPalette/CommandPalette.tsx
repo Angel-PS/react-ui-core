@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { normalize } from "../../lib/normalize";
 import { cn } from "../../lib/utils";
 import type {
   CommandItem,
@@ -17,18 +18,21 @@ const DEFAULT_LABELS: CommandPaletteLabels = {
   hint: "↑↓ to navigate · ↵ to select · esc to close",
 };
 
-/** Case-insensitive label filter; drops sections left empty. */
+/**
+ * Case- and accent-insensitive filter ("compania" finds "Compañía") on each
+ * item's `label` and `groupLabel`; drops sections left empty.
+ */
 export function filterSections(
   sections: CommandSection[],
   query: string,
 ): CommandSection[] {
-  const q = query.trim().toLowerCase();
+  const q = normalize(query.trim());
   if (!q) return sections;
+  const matches = (item: CommandItem) =>
+    normalize(item.label).includes(q) ||
+    (item.groupLabel ? normalize(item.groupLabel).includes(q) : false);
   return sections
-    .map((s) => ({
-      ...s,
-      items: s.items.filter((i) => i.label.toLowerCase().includes(q)),
-    }))
+    .map((s) => ({ ...s, items: s.items.filter(matches) }))
     .filter((s) => s.items.length > 0);
 }
 

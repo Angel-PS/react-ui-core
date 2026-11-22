@@ -99,4 +99,20 @@ describe("TableFreshnessBar", () => {
     expect(screen.getByText("Actualizado hace 10 minutos")).toBeInTheDocument();
     expect(screen.getByRole("button")).toHaveAttribute("title", "Actualizar");
   });
+
+  it("anchors its sr-only live region inside a positioned box of its own", () => {
+    // jsdom has no layout, so this pins the cause (a positioned ancestor within
+    // the component) rather than the symptom (a white band under the shell).
+    const { container } = render(
+      <TableFreshnessBar updatedAt={Date.now()} onRefresh={() => {}} />,
+    );
+    const live = container.querySelector<HTMLElement>(".sr-only[aria-live]");
+    expect(live).not.toBeNull();
+    const POSITIONED = /(^|\s)(relative|absolute|fixed|sticky)(\s|$)/;
+    let anchored = false;
+    for (let p = live!.parentElement; p && p !== container; p = p.parentElement) {
+      if (POSITIONED.test(p.className)) anchored = true;
+    }
+    expect(anchored).toBe(true);
+  });
 });

@@ -44,7 +44,7 @@ export const MaintenanceFilters: FC<MaintenanceFiltersProps> = ({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {inlineDefs.map((def) => {
           const field = (
             <FilterField def={def} values={values} setValue={setValue} />
@@ -60,12 +60,16 @@ export const MaintenanceFilters: FC<MaintenanceFiltersProps> = ({
             </div>
           );
         })}
+        {/* `ml-auto` pins the trigger right even when there are no inline
+            filters, so the panel always opens inward over the table. */}
         {popoverDefs.length > 0 && (
-          <FiltersPopover
-            defs={popoverDefs}
-            controller={controller}
-            labels={mergedLabels}
-          />
+          <div className="ml-auto">
+            <FiltersPopover
+              defs={popoverDefs}
+              controller={controller}
+              labels={mergedLabels}
+            />
+          </div>
         )}
       </div>
       {popoverDefs.length > 0 && (

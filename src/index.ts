@@ -10,8 +10,60 @@ export type { SelectProps } from "./components/Select";
 export { InputCheckbox, InputToggle } from "./components/InputToggle";
 export { SearchInput } from "./components/SearchInput";
 export type { SearchInputProps } from "./components/SearchInput";
-export { MultiSelect } from "./components/MultiSelect";
-export type { MultiSelectProps } from "./components/MultiSelect";
+export { MultiSelect, DEFAULT_MULTISELECT_LABELS } from "./components/MultiSelect";
+export type { MultiSelectProps, MultiSelectLabels } from "./components/MultiSelect";
+export {
+  CurrencyInput,
+  clampNumber,
+  parseCurrencyText,
+  formatCurrencyLive,
+} from "./components/CurrencyInput";
+export type { CurrencyInputProps } from "./components/CurrencyInput";
+export {
+  ColorInput,
+  DEFAULT_COLOR_PRESETS,
+  DEFAULT_COLOR_INPUT_LABELS,
+  isHexColor,
+  normalizeHex,
+} from "./components/ColorInput";
+export type { ColorInputProps, ColorInputLabels } from "./components/ColorInput";
+export { TagInput, cleanTag, splitPastedTags } from "./components/TagInput";
+export type { TagInputProps } from "./components/TagInput";
+export { Switch } from "./components/Switch";
+export type { SwitchProps } from "./components/Switch";
+export {
+  Tabs,
+  TabPanel,
+  tabId,
+  tabPanelId,
+  DEFAULT_TABS_LABELS,
+} from "./components/Tabs";
+export type {
+  TabItem,
+  TabsProps,
+  TabsLabels,
+  TabPanelProps,
+} from "./components/Tabs";
+
+export { FormActions, DEFAULT_FORM_ACTIONS_LABELS } from "./components/FormActions";
+export type { FormActionsProps, FormActionsLabels } from "./components/FormActions";
+
+// ── Feedback ────────────────────────────────────────────────────────────────
+export { EmptyState } from "./components/EmptyState";
+export type { EmptyStateProps } from "./components/EmptyState";
+export { ErrorState, DEFAULT_ERROR_STATE_LABELS } from "./components/ErrorState";
+export type { ErrorStateProps, ErrorStateLabels } from "./components/ErrorState";
+export { ErrorBoundary, DEFAULT_ERROR_BOUNDARY_LABELS } from "./components/ErrorBoundary";
+export type {
+  ErrorBoundaryProps,
+  ErrorBoundaryLabels,
+} from "./components/ErrorBoundary";
+
+// ── Data ────────────────────────────────────────────────────────────────────
+export { Sparkline, sparklinePath } from "./components/Sparkline";
+export type { SparklineProps, SparklinePaths } from "./components/Sparkline";
+export { Trend } from "./components/Trend";
+export type { TrendProps, TrendLabels } from "./components/Trend";
 
 // ── Overlays ────────────────────────────────────────────────────────────────
 export { Modal } from "./components/Modal";
@@ -21,6 +73,8 @@ export type {
   ConfirmDialogProps,
   ConfirmDialogItemDetail,
 } from "./components/ConfirmDialog";
+export { ModalHeader, DEFAULT_MODAL_HEADER_LABELS } from "./components/ModalHeader";
+export type { ModalHeaderProps, ModalHeaderLabels } from "./components/ModalHeader";
 
 // ── Table ───────────────────────────────────────────────────────────────────
 export { Table, ColumnManager } from "./components/Table";
@@ -28,6 +82,7 @@ export type {
   TableProps,
   TableLabels,
   ColumnManagerLabels,
+  ColumnManagerProps,
 } from "./components/Table";
 export { TableFreshnessBar } from "./components/TableFreshnessBar";
 export type {
@@ -79,6 +134,10 @@ export type {
   SearchBarConfig,
   SearchToolbarLabels,
 } from "./components/MaintenanceLayout";
+export { SectionHeading } from "./components/SectionHeading";
+export type { SectionHeadingProps } from "./components/SectionHeading";
+export { Card, SettingRow } from "./components/Card";
+export type { CardProps, CardVariant, SettingRowProps } from "./components/Card";
 
 // ── App Shell ─────────────────────────────────────────────────────────────────
 export { AppLayout } from "./components/AppLayout";
@@ -87,6 +146,15 @@ export type {
   SidebarSlotState,
   NavbarSlotState,
 } from "./components/AppLayout";
+export {
+  CompanySwitcherDialog,
+  DEFAULT_COMPANY_SWITCHER_DIALOG_LABELS,
+  matchesCompany,
+} from "./components/CompanySwitcherDialog";
+export type {
+  CompanySwitcherDialogProps,
+  CompanySwitcherDialogLabels,
+} from "./components/CompanySwitcherDialog";
 export { Sidebar, CompanySwitcher, isPathActive } from "./components/Sidebar";
 export type {
   SidebarProps,
@@ -125,6 +193,7 @@ export type {
   UserMenuProps,
   UserMenuItem,
   UserMenuLabels,
+  UserMenuNameBreakpoint,
 } from "./components/UserMenu";
 export { LanguageSwitcher } from "./components/LanguageSwitcher";
 export type {
@@ -139,12 +208,20 @@ export type {
   NewActionGroup,
   NewActionOption,
 } from "./components/NewActionMenu";
-export { NotificationBell, NotificationListItem } from "./components/NotificationBell";
+export {
+  NotificationBell,
+  NotificationListItem,
+  notificationTones,
+  getNotificationToneStyle,
+} from "./components/NotificationBell";
 export type {
   NotificationBellProps,
   NotificationBellLabels,
   NotificationListItemProps,
+  NotificationListItemLabels,
   NotificationItem,
+  NotificationTone,
+  NotificationToneStyle,
 } from "./components/NotificationBell";
 export { CommandPalette, filterSections } from "./components/CommandPalette";
 export type {
@@ -155,16 +232,38 @@ export type {
 } from "./components/CommandPalette";
 
 // ── Hooks ───────────────────────────────────────────────────────────────────
-export { useClickOutside, useElapsedSince } from "./hooks";
+export {
+  useClickOutside,
+  useElapsedSince,
+  useDialogA11y,
+  useGlobalHotkey,
+  useReducedMotion,
+} from "./hooks";
+export type { UseDialogA11yOptions, UseGlobalHotkeyOptions } from "./hooks";
 
 // ── Lib ─────────────────────────────────────────────────────────────────────
 export { cn } from "./lib/utils";
 export { getStatusStyle, statusStyles } from "./lib/statusStyles";
-export { applyColumnPrefs } from "./lib/applyColumnPrefs";
+export type { StatusStyle } from "./lib/statusStyles";
+export {
+  applyColumnPrefs,
+  defaultHiddenAccessors,
+  resolveHiddenAccessors,
+} from "./lib/applyColumnPrefs";
+export {
+  pickHorizontalAnchor,
+  horizontalAnchorFor,
+  fixedPopoverPosition,
+} from "./lib/popoverAlign";
+export type { Anchor, FixedPopoverPosition } from "./lib/popoverAlign";
+export { normalize } from "./lib/normalize";
 export {
   formatDate,
   formatDecimal,
   formatRelativeTime,
+  formatCompact,
+  formatDateIntl,
+  formatDateRangeIntl,
   getInitials,
   cleanStatusValue,
   capitalizeWords,

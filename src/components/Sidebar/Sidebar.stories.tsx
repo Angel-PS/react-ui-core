@@ -52,7 +52,13 @@ const meta: Meta<typeof Sidebar> = {
 export default meta;
 type Story = StoryObj<typeof Sidebar>;
 
-const Demo = ({ dark = false }: { dark?: boolean }) => {
+const Demo = ({
+  dark = false,
+  loading = false,
+}: {
+  dark?: boolean;
+  loading?: boolean;
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activePath, setActivePath] = useState("/dashboard");
   const [activeId, setActiveId] = useState<string | number>(1);
@@ -68,13 +74,20 @@ const Demo = ({ dark = false }: { dark?: boolean }) => {
           onToggleCollapse={() => setIsCollapsed((c) => !c)}
           onMobileClose={() => {}}
           appName="BluePOS"
+          brandIcon={
+            <span className="bg-primary-blue-default grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-white shadow-xs">
+              BP
+            </span>
+          }
           version="0.4.0"
+          loading={loading}
           footer={
             <CompanySwitcher
               activeCompany={companies.find((c) => c.id === activeId)}
               companies={companies}
               onSelectCompany={setActiveId}
               isCollapsed={isCollapsed}
+              loading={loading}
             />
           }
         />
@@ -88,3 +101,18 @@ const Demo = ({ dark = false }: { dark?: boolean }) => {
 
 export const Default: Story = { render: () => <Demo /> };
 export const Dark: Story = { render: () => <Demo dark /> };
+export const Loading: Story = { render: () => <Demo loading /> };
+export const LoadingDark: Story = { render: () => <Demo dark loading /> };
+
+export const NoActiveCompany: Story = {
+  render: () => (
+    <div className="w-60 p-2">
+      <CompanySwitcher
+        activeCompany={null}
+        companies={companies}
+        onSelectCompany={() => {}}
+        labels={{ noCompanyHint: "Platform only" }}
+      />
+    </div>
+  ),
+};

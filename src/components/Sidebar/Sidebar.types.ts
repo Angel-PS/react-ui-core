@@ -47,6 +47,15 @@ export interface SidebarLabels {
 export interface CompanySwitcherLabels {
   switchCompany: string;
   yourCompanies: string;
+  /** Primary line when no company is active but one can be picked. */
+  noCompany: string;
+  /** Primary line when no company is active and there is nothing to pick. */
+  noCompanyAvailable: string;
+  /**
+   * Secondary line when no company is active (e.g. "Platform only" for an
+   * operator who deliberately works without a tenant). Default: empty.
+   */
+  noCompanyHint: string;
 }
 
 export interface SidebarProps {
@@ -65,8 +74,17 @@ export interface SidebarProps {
   onToggleCollapse: () => void;
   onMobileClose: () => void;
 
-  /** Custom brand node for the header (clickable area). Falls back to `appName`. */
+  /**
+   * Custom brand node for the header (clickable area). When set it replaces the
+   * default brand entirely (`brandIcon` + `appName`), so it must handle the
+   * collapsed rail itself.
+   */
   logo?: ReactNode;
+  /**
+   * Icon/image rendered before `appName` in the default brand. The name hides on
+   * the collapsed desktop rail, leaving only this icon. Ignored when `logo` is set.
+   */
+  brandIcon?: ReactNode;
   /** App name shown as the brand text and version prefix. */
   appName?: string;
   /** Path navigated to when the brand is clicked. Default `/`. */
@@ -75,6 +93,14 @@ export interface SidebarProps {
   version?: string;
   /** Footer slot rendered above the version line (e.g. `<CompanySwitcher/>`). */
   footer?: ReactNode;
+  /**
+   * Render pulsing placeholder rows instead of `groups` — use while the consumer
+   * is still resolving what the user may see (e.g. permissions in flight), so
+   * the menu does not flash empty and then pop in.
+   */
+  loading?: boolean;
+  /** Number of placeholder rows while `loading`. Default 8. */
+  skeletonCount?: number;
   labels?: Partial<SidebarLabels>;
   className?: string;
 }
@@ -82,10 +108,18 @@ export interface SidebarProps {
 export interface CompanySwitcherProps {
   activeCompany?: CompanyOption | null;
   companies: CompanyOption[];
-  /** Whether switching is allowed. Defaults to `companies.length > 1`. */
+  /**
+   * Whether switching is allowed. Defaults to "there is another company to
+   * pick": `companies.length > 1` with an active company, `> 0` without one.
+   */
   canSwitch?: boolean;
   onSelectCompany: (id: string | number) => void;
   isCollapsed?: boolean;
+  /**
+   * Show a skeleton instead of the company row — use while the active company /
+   * profile is still loading, rather than flashing a placeholder name.
+   */
+  loading?: boolean;
   labels?: Partial<CompanySwitcherLabels>;
 }
 

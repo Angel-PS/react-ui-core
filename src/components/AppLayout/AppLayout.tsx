@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { cn } from "../../lib/utils";
+import { ErrorBoundary, type ErrorBoundaryProps } from "../ErrorBoundary";
 
 /** State the shell hands to the `sidebar` slot so it stays in sync. */
 export interface SidebarSlotState {
@@ -32,6 +33,17 @@ export interface AppLayoutProps {
   showHeader?: boolean | "mobile-only";
   /** Extra classes for the scrollable `<main>`. */
   className?: string;
+  /**
+   * Wrap the page content in an `ErrorBoundary`, so a crashing page shows a
+   * recovery card inside the shell instead of blanking the whole app. `true`
+   * uses the defaults; an object is forwarded as the boundary's props.
+   */
+  errorBoundary?: boolean | Omit<ErrorBoundaryProps, "children" | "resetKey">;
+  /**
+   * Identity of the current page (e.g. the route pathname). When it changes,
+   * the error boundary clears, so navigating away from a crashed page recovers.
+   */
+  contentKey?: string | number;
 }
 
 /**
@@ -50,12 +62,15 @@ export const AppLayout = ({
   children,
   showHeader = true,
   className,
+  errorBoundary,
+  contentKey,
 }: AppLayoutProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const headerVisible = showHeader !== false;
   const mobileOnly = showHeader === "mobile-only";
+  const boundaryProps = typeof errorBoundary === "object" ? errorBoundary : {};
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
@@ -80,7 +95,13 @@ export const AppLayout = ({
         {banner}
 
         <main className={cn("flex-1 overflow-auto p-4 lg:px-8 lg:py-6", className)}>
-          {children}
+          {errorBoundary ? (
+            <ErrorBoundary {...boundaryProps} resetKey={contentKey}>
+              {children}
+            </ErrorBoundary>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

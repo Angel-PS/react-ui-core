@@ -22,7 +22,9 @@ import {
   cleanStatusValue,
 } from "../../lib/format";
 import { getStatusStyle } from "../../lib/statusStyles";
+import type { StatusStyle } from "../../lib/statusStyles";
 import { Pagination } from "../Pagination";
+import type { PaginationLabels } from "../Pagination";
 
 export interface TableLabels {
   noRecords: string;
@@ -51,6 +53,10 @@ export interface TableProps {
   isLoading?: boolean;
   /** Controlled sort: a header `sortKey` ("name" asc, "-name" desc) or null. */
   sort?: string | null;
+  /**
+   * Called with the next sort (or null to clear). A new sort usually means
+   * going back to page 1 — that is the consumer's job (e.g. drop `?page`).
+   */
   onSortChange?: (next: string | null) => void;
   /** Forwarded to the footer <Pagination> when `metadata.pagination` is present. */
   onPageChange?: (page: number) => void;
@@ -68,6 +74,22 @@ export interface TableProps {
    * only marks them busy, so a manual refresh never blanks the table.
    */
   isRefreshing?: boolean;
+  /**
+   * IANA time zone for `date`/`datetime` cells and expand values (e.g.
+   * "America/Santo_Domingo"). Defaults to the viewer's local zone — set it when
+   * the data belongs to a business in a fixed zone.
+   */
+  timeZone?: string;
+  /** Forwarded to the footer `<Pagination>` so its text can be translated. */
+  paginationLabels?: Partial<PaginationLabels>;
+  /** Forwarded to the footer `<Pagination>` page-size select. */
+  rowsPerPageOptions?: number[];
+  /**
+   * Extra or replacement status → badge/dot classes for `status` cells, merged
+   * over the library's defaults (keys are lower-case status values). Lets an
+   * app color its own statuses without mutating the shared map.
+   */
+  statusStyles?: Record<string, StatusStyle>;
   labels?: Partial<TableLabels>;
 }
 
@@ -200,6 +222,10 @@ export const Table = ({
   defaultPageSize = 25,
   toolbar,
   isRefreshing = false,
+  timeZone,
+  paginationLabels,
+  rowsPerPageOptions,
+  statusStyles,
   labels,
 }: TableProps) => {
   const l: TableLabels = {
@@ -323,9 +349,9 @@ export const Table = ({
   const formatExpandValue = (field: ExpandField, raw: string | number) => {
     switch (field.dataType) {
       case "date":
-        return formatDate(String(raw), "DD-MM-YYYY");
+        return formatDate(String(raw), "DD-MM-YYYY", false, timeZone);
       case "datetime":
-        return formatDate(String(raw), "DD-MM-YYYY", true);
+        return formatDate(String(raw), "DD-MM-YYYY", true, timeZone);
       case "decimal":
         return formatDecimal(Number(raw));
       default:
@@ -530,7 +556,12 @@ export const Table = ({
                                 key={key}
                                 className={`truncate px-5 py-3.5 text-sm text-slate-500 dark:text-slate-300 ${alignClass}`}
                               >
-                                {formatDate(String(column.value), "DD-MM-YYYY")}
+                                {formatDate(
+                                  String(column.value),
+                                  "DD-MM-YYYY",
+                                  false,
+                                  timeZone,
+                                )}
                               </td>
                             );
                           case "datetime":
@@ -543,6 +574,7 @@ export const Table = ({
                                   String(column.value),
                                   "DD-MM-YYYY",
                                   true,
+                                  timeZone,
                                 )}
                               </td>
                             );
@@ -558,6 +590,7 @@ export const Table = ({
                           case "status": {
                             const { dot, badge } = getStatusStyle(
                               String(column.value),
+                              statusStyles,
                             );
 
                             if (!column.value) return <td key={key}></td>;
@@ -579,6 +612,11 @@ export const Table = ({
                                   />
                                   {display}
                                 </span>
+                                {column.adornment && (
+                                  <span className="ml-1.5 inline-flex align-middle">
+                                    {column.adornment}
+                                  </span>
+                                )}
                               </td>
                             );
                           }
@@ -599,7 +637,19 @@ export const Table = ({
                                 key={key}
                                 className={`truncate px-5 py-3.5 text-sm text-slate-700 dark:text-slate-100 ${alignClass}`}
                               >
-                                {column.value}
+                                {column.subValue !== undefined &&
+                                column.subValue !== "" ? (
+                                  <>
+                                    <span className="block truncate">
+                                      {column.value}
+                                    </span>
+                                    <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                                      {column.subValue}
+                                    </span>
+                                  </>
+                                ) : (
+                                  column.value
+                                )}
                               </td>
                             );
                         }
@@ -675,6 +725,8 @@ export const Table = ({
           pageSize={metadata.pagination.size ?? defaultPageSize}
           onPageChange={onPageChange ?? (() => {})}
           onPageSizeChange={onPageSizeChange}
+          rowsPerPageOptions={rowsPerPageOptions}
+          labels={paginationLabels}
         />
       )}
 

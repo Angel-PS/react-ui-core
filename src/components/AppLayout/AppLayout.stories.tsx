@@ -190,3 +190,20 @@ const Demo = ({ dark = false }: { dark?: boolean }) => {
 
 export const Light: Story = { render: () => <Demo /> };
 export const Dark: Story = { render: () => <Demo dark /> };
+
+const CrashingPage = (): never => {
+  throw new Error("Story: page crash");
+};
+
+/** A page that throws: the shell stays, the boundary shows its crash card. */
+export const CrashedPage: Story = {
+  render: () => (
+    <AppLayout
+      sidebar={() => <aside className="w-64 border-r border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />}
+      errorBoundary={{ onError: () => {}, onRetry: () => {} }}
+      contentKey="/crashed"
+    >
+      <CrashingPage />
+    </AppLayout>
+  ),
+};

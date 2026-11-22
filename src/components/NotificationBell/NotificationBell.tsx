@@ -15,6 +15,7 @@ const DEFAULT_LABELS: NotificationBellLabels = {
   markAllRead: "Mark all as read",
   viewAll: "View all",
   empty: "You're all caught up",
+  unread: "Unread",
 };
 
 /**
@@ -82,6 +83,7 @@ export const NotificationBell = ({
                   key={notification.id}
                   notification={notification}
                   onClick={onItemClick}
+                  labels={{ unread: l.unread }}
                 />
               ))
             )}

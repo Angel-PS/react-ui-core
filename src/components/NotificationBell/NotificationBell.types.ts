@@ -1,5 +1,13 @@
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
+/** Severity/kind of a notification — picks the row's icon and colors. */
+export type NotificationTone =
+  | "info"
+  | "success"
+  | "warning"
+  | "critical"
+  | "release";
+
 /** A generic notification entry (decoupled from any app's notification model). */
 export interface NotificationItem {
   id: string | number;
@@ -9,6 +17,12 @@ export interface NotificationItem {
   time?: string;
   /** Whether the notification has been read. */
   read?: boolean;
+  /**
+   * Severity/kind: sets the icon, the icon-box tint and the unread dot color.
+   * Omit for the neutral brand-blue bell.
+   */
+  tone?: NotificationTone;
+  /** Overrides the tone's icon. */
   icon?: IconDefinition;
 }
 
@@ -18,6 +32,13 @@ export interface NotificationBellLabels {
   markAllRead: string;
   viewAll: string;
   empty: string;
+  /** Accessible name of the unread dot on a row. */
+  unread: string;
+}
+
+export interface NotificationListItemLabels {
+  /** Accessible name (and tooltip) of the unread dot. */
+  unread: string;
 }
 
 export interface NotificationBellProps {
@@ -37,4 +58,5 @@ export interface NotificationBellProps {
 export interface NotificationListItemProps {
   notification: NotificationItem;
   onClick: (notification: NotificationItem) => void;
+  labels?: Partial<NotificationListItemLabels>;
 }

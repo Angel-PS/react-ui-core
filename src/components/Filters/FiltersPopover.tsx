@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faSliders } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "../Button";
 import { useClickOutside } from "../../hooks";
+import { horizontalAnchorFor, type Anchor } from "../../lib/popoverAlign";
 import { cn } from "../../lib/utils";
 import { FilterField } from "./FilterField";
 import { isFilterApplied } from "./helpers";
@@ -16,6 +17,9 @@ interface FiltersPopoverProps {
   controller: FilterController;
   labels: FiltersLabels;
 }
+
+/** Keep in sync with the desktop panel's `w-72`. */
+const PANEL_WIDTH = 288;
 
 const seedFrom = (defs: FilterDef[], source: FilterValues): FilterValues => {
   const out: FilterValues = {};
@@ -37,6 +41,7 @@ export const FiltersPopover: FC<FiltersPopoverProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<FilterValues>({});
+  const [anchor, setAnchor] = useState<Anchor>("right");
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false));
 
   // Seed the draft from the live values whenever the popover opens, and wire Escape.
@@ -58,6 +63,13 @@ export const FiltersPopover: FC<FiltersPopoverProps> = ({
 
   const setDraftValue = (key: string, value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
+
+  // Measure before opening so the panel is already on the right edge for its
+  // first paint — no flash at an anchor that would be clipped.
+  const handleToggle = () => {
+    if (!open) setAnchor(horizontalAnchorFor(ref.current, PANEL_WIDTH));
+    setOpen((v) => !v);
+  };
 
   const handleApply = () => {
     controller.setMany(draft);
@@ -108,7 +120,7 @@ export const FiltersPopover: FC<FiltersPopoverProps> = ({
       <Button
         type="button"
         variant="classic"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         aria-haspopup="dialog"
         aria-expanded={open}
         className="inline-flex items-center gap-2"
@@ -131,10 +143,14 @@ export const FiltersPopover: FC<FiltersPopoverProps> = ({
 
       {open && (
         <>
-          {/* Desktop (≥ sm): anchored dropdown under the trigger. */}
+          {/* Desktop (≥ sm): anchored dropdown under the trigger. The anchor
+              flips to the left edge when growing leftward would be clipped. */}
           <div
             role="dialog"
-            className="absolute top-[calc(100%+6px)] right-0 z-50 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-xl sm:block"
+            className={cn(
+              "absolute top-[calc(100%+6px)] z-50 hidden w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-xl sm:block",
+              anchor === "left" ? "left-0" : "right-0",
+            )}
             style={{ animation: "bp-fadein 0.14s ease-out" }}
           >
             {panel}

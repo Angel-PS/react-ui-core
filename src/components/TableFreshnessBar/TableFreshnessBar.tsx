@@ -108,8 +108,12 @@ export const TableFreshnessBar: FC<TableFreshnessBarProps> = ({
       ? "bg-accent-amber"
       : "bg-emerald-500";
 
+  // `relative` anchors the sr-only live region below to this strip. Without a
+  // positioned ancestor it anchors to the document, and inside a full-height
+  // shell whose <main> scrolls, its static position lands below the shell —
+  // the window grows a white band under the layout.
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-gray-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
+    <div className="relative flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-gray-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
       <span
         title={tooltip}
         className="flex min-w-0 items-center gap-2 text-xs text-gray-500 dark:text-slate-400"

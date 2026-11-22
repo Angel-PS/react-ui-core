@@ -38,10 +38,13 @@ export const Sidebar = ({
   onToggleCollapse,
   onMobileClose,
   logo,
+  brandIcon,
   appName = "App",
   homePath = "/",
   version,
   footer,
+  loading = false,
+  skeletonCount = 8,
   labels,
   className,
 }: SidebarProps) => {
@@ -89,9 +92,17 @@ export const Sidebar = ({
             )}
           >
             {logo ?? (
-              <span className="text-primary-blue-darker truncate text-[14px] font-bold">
-                {appName}
-              </span>
+              <>
+                {brandIcon}
+                <span
+                  className={cn(
+                    "text-primary-blue-darker truncate text-[14px] font-bold",
+                    isCollapsed && "lg:hidden",
+                  )}
+                >
+                  {appName}
+                </span>
+              </>
             )}
           </a>
 
@@ -128,8 +139,24 @@ export const Sidebar = ({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-2">
-          {groups.map((group, gi) => {
+        <nav
+          className="flex-1 overflow-y-auto px-2 py-2"
+          aria-busy={loading || undefined}
+        >
+          {/* While the consumer is still resolving what the user may see (e.g.
+              permissions in flight), render placeholder rows instead of an
+              empty menu that then pops in. */}
+          {loading &&
+            Array.from({ length: skeletonCount }).map((_, i) => (
+              <div
+                key={i}
+                aria-hidden="true"
+                data-testid="sidebar-skeleton-row"
+                className="mx-1 mb-1.5 h-9 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800"
+              />
+            ))}
+          {!loading &&
+            groups.map((group, gi) => {
             if (group.items.length === 0) return null;
             return (
               <div key={group.key} className="mb-3">

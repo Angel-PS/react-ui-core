@@ -1,4 +1,8 @@
-import { applyColumnPrefs } from "./applyColumnPrefs";
+import {
+  applyColumnPrefs,
+  defaultHiddenAccessors,
+  resolveHiddenAccessors,
+} from "./applyColumnPrefs";
 import type { HeaderColumn } from "../types";
 
 const cols: HeaderColumn[] = [
@@ -51,5 +55,52 @@ describe("applyColumnPrefs", () => {
       hidden: ["name", "email", "status"],
     });
     expect(r).toHaveLength(1);
+  });
+});
+
+describe("applyColumnPrefs — optional (defaultHidden) columns", () => {
+  const catalog: HeaderColumn[] = [
+    { value: "Name", accessor: "name" },
+    { value: "RNC", accessor: "rnc" },
+    { value: "Address", accessor: "address", defaultHidden: true },
+    { value: "Created", accessor: "createdAt", defaultHidden: true },
+  ];
+  const accessors = (headers: HeaderColumn[]) =>
+    headers.map((h) => h.accessor).join(",");
+
+  it("start hidden without a pref", () => {
+    expect(accessors(applyColumnPrefs(catalog))).toBe("name,rnc");
+    expect(defaultHiddenAccessors(catalog)).toEqual(["address", "createdAt"]);
+  });
+
+  it("show once the user switched them on", () => {
+    const pref = {
+      order: ["name", "address", "rnc", "createdAt"],
+      hidden: ["createdAt"],
+    };
+    expect(accessors(applyColumnPrefs(catalog, pref))).toBe("name,address,rnc");
+  });
+
+  it("an optional column shipped after the user saved stays hidden", () => {
+    const pref = { order: ["name", "rnc", "address"], hidden: [] };
+    expect(resolveHiddenAccessors(catalog, pref)).toEqual(["createdAt"]);
+    expect(accessors(applyColumnPrefs(catalog, pref))).toBe("name,rnc,address");
+  });
+
+  it("a pinned column is never hidden by default", () => {
+    expect(
+      defaultHiddenAccessors([
+        { value: "ID", accessor: "id", locked: true, defaultHidden: true },
+      ]),
+    ).toEqual([]);
+  });
+
+  it("resolveHiddenAccessors drops pinned and removed columns from a pref", () => {
+    const pref = { order: ["name", "rnc"], hidden: ["gone", "name"] };
+    const withLocked: HeaderColumn[] = [
+      { value: "Name", accessor: "name", locked: true },
+      { value: "RNC", accessor: "rnc" },
+    ];
+    expect(resolveHiddenAccessors(withLocked, pref)).toEqual([]);
   });
 });

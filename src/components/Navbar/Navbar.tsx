@@ -41,8 +41,10 @@ export const Navbar = ({
   return (
     <>
       <nav className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/85 px-4 py-3 shadow-sm backdrop-blur-md transition-all lg:px-8 dark:border-slate-800 dark:bg-slate-900/85">
-        {/* Left: mobile menu button + page title */}
-        <div className="flex items-center gap-3">
+        {/* Left: mobile menu button + page title. `min-w-0`: the title is the
+            one thing that gives way (it truncates) when the actions on the
+            right need the room. */}
+        <div className="flex min-w-0 items-center gap-3">
           <button
             onClick={onMenuClick}
             className="focus-visible:ring-primary-blue-light inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:ring-2 focus-visible:outline-none lg:hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -50,14 +52,16 @@ export const Navbar = ({
           >
             <FontAwesomeIcon icon={faBars} className="text-lg" />
           </button>
-          <h1 className="text-base leading-tight font-bold tracking-tight text-gray-900 dark:text-slate-100">
+          <h1 className="min-w-0 truncate text-base leading-tight font-bold tracking-tight text-gray-900 dark:text-slate-100">
             {title}
           </h1>
         </div>
 
-        {/* Right: actions */}
+        {/* Right: actions. Never shrinks: what does not fit is the title. */}
         {actions && (
-          <div className="flex items-center gap-2 sm:gap-3">{actions}</div>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {actions}
+          </div>
         )}
       </nav>
 

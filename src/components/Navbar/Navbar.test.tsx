@@ -25,4 +25,20 @@ describe("Navbar", () => {
     );
     expect(screen.getByTestId("palette")).toBeInTheDocument();
   });
+
+  it("lets the title truncate instead of pushing the actions off-screen", () => {
+    render(
+      <Navbar
+        title="A very long page title"
+        onMenuClick={() => {}}
+        actions={<button>Bell</button>}
+      />,
+    );
+    const title = screen.getByRole("heading", { name: "A very long page title" });
+    expect(title).toHaveClass("min-w-0", "truncate");
+    expect(title.parentElement).toHaveClass("min-w-0");
+    expect(screen.getByRole("button", { name: "Bell" }).parentElement).toHaveClass(
+      "shrink-0",
+    );
+  });
 });

@@ -31,6 +31,43 @@ describe("filterSections", () => {
       "new-inv",
     ]);
   });
+
+  it("ignores accents on both the query and the labels", () => {
+    const es: CommandSection[] = [
+      {
+        id: "nav",
+        title: "Navegar",
+        items: [
+          { id: "co", label: "Compañías", path: "/companies" },
+          { id: "cfg", label: "Configuracion", path: "/settings" },
+        ],
+      },
+    ];
+    expect(
+      filterSections(es, "compania").flatMap((s) => s.items).map((i) => i.id),
+    ).toEqual(["co"]);
+    expect(
+      filterSections(es, "configuración").flatMap((s) => s.items).map((i) => i.id),
+    ).toEqual(["cfg"]);
+  });
+
+  it("matches an item by its groupLabel too", () => {
+    const withGroups: CommandSection[] = [
+      {
+        id: "nav",
+        title: "Navigate",
+        items: [
+          { id: "seq", label: "Sequences", groupLabel: "Facturación", path: "/seq" },
+          { id: "dash", label: "Dashboard", groupLabel: "General", path: "/" },
+        ],
+      },
+    ];
+    expect(
+      filterSections(withGroups, "facturacion")
+        .flatMap((s) => s.items)
+        .map((i) => i.id),
+    ).toEqual(["seq"]);
+  });
 });
 
 describe("CommandPalette", () => {

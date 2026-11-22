@@ -19,3 +19,12 @@ export const Default: Story = {
     ],
   },
 };
+
+export const Loading: Story = {
+  args: { ...Default.args, loading: true },
+};
+
+/** Avatar only below 1280px — for a crowded navbar at tablet widths. */
+export const NameFromXl: Story = {
+  args: { ...Default.args, nameBreakpoint: "xl" },
+};

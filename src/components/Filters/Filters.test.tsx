@@ -76,4 +76,37 @@ describe("useFilterController", () => {
     expect(result.current.values.branch).toBe("");
     expect(onChange).toHaveBeenCalled();
   });
+
+  it("keeps both updates when two land in the same tick", () => {
+    const onChange = vi.fn();
+    const { result } = renderHook(() =>
+      useFilterController([segmented, select], { onChange }),
+    );
+    act(() => {
+      // Same render-time controller for both calls, as a pill removal followed
+      // by a setValue in one handler would use.
+      const controller = result.current;
+      controller.setValue("branch", "1");
+      controller.setValue("status", "active");
+    });
+    expect(result.current.values).toMatchObject({
+      branch: "1",
+      status: "active",
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ branch: "1", status: "active" }),
+    );
+  });
+
+  it("clear after setMany in the same tick resets only from the latest values", () => {
+    const { result } = renderHook(() =>
+      useFilterController([segmented, select]),
+    );
+    act(() => {
+      const controller = result.current;
+      controller.setMany({ branch: "1", status: "active" });
+      controller.clear(["status"]);
+    });
+    expect(result.current.values).toMatchObject({ branch: "1", status: "" });
+  });
 });

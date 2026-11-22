@@ -95,11 +95,13 @@ export const Breadcrumbs = ({
   );
 
   return (
-    <div
-      className="flex h-11 shrink-0 items-center border-b border-gray-200 bg-white px-4 lg:px-8 dark:border-slate-800 dark:bg-slate-900"
-      aria-label={l.ariaLabel}
-    >
-      <nav className="flex w-full min-w-0 items-center gap-1.5 text-[13px]">
+    <div className="flex h-11 shrink-0 items-center border-b border-gray-200 bg-white px-4 lg:px-8 dark:border-slate-800 dark:bg-slate-900">
+      {/* The name goes on the landmark itself: an aria-label on a plain <div>
+          is ignored by assistive tech, leaving an unnamed navigation. */}
+      <nav
+        aria-label={l.ariaLabel}
+        className="flex w-full min-w-0 items-center gap-1.5 text-[13px]"
+      >
         {items.map((it, i) => {
           const isLast = i === items.length - 1;
           const sep = i > 0 ? renderSeparator(i) : null;

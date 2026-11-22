@@ -21,6 +21,8 @@ const headers: HeaderColumn[] = [
   { value: "Cliente", accessor: "name", sortKey: "name", locked: true },
   { value: "Correo", accessor: "email" },
   { value: "Estado", accessor: "status" },
+  // Optional column: hidden until the user turns it on in "Columns".
+  { value: "Teléfono", accessor: "phone", defaultHidden: true },
 ];
 
 const rows: RowColumn[] = [
@@ -70,6 +72,7 @@ export const Page: Story = {
     const [sort, setSort] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [columnPref, setColumnPref] = useState<TableColumnPref | undefined>();
+    const [updatedAt, setUpdatedAt] = useState(() => Date.now());
     return (
       <MaintenanceLayout
         maintenanceType="page"
@@ -92,6 +95,18 @@ export const Page: Story = {
         onSearchChange={setSearch}
         sort={sort}
         onSortChange={setSort}
+        searchDebounceMs={400}
+        refresh={{
+          updatedAt,
+          // Returning the Promise lets the layout track the manual refresh.
+          onRefresh: () =>
+            new Promise<void>((resolve) =>
+              setTimeout(() => {
+                setUpdatedAt(Date.now());
+                resolve();
+              }, 800),
+            ),
+        }}
       />
     );
   },

@@ -1,27 +1,63 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 
 interface InputCheckboxProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   loading?: boolean;
+  /**
+   * Tri-state "some, not all" (a "select all" over a partly ticked list). Drawn
+   * as a dash; it sets the native `indeterminate` property, which is what screen
+   * readers announce as "mixed". InputCheckbox only.
+   */
+  indeterminate?: boolean;
+  /**
+   * 18px box for dense lists (a filter checklist), where the 28px form box
+   * outweighs the text beside it. Not `size`: inputs already own that
+   * attribute. InputCheckbox only.
+   */
+  compact?: boolean;
 }
 
 export const InputCheckbox = forwardRef<HTMLInputElement, InputCheckboxProps>(
-  ({ label, error, id, loading, ...props }, ref) => {
+  (
+    { label, error, id, loading, indeterminate = false, compact = false, ...props },
+    ref,
+  ) => {
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    // `indeterminate` has no HTML attribute — it only exists as a DOM property.
+    useEffect(() => {
+      if (inputRef.current) inputRef.current.indeterminate = indeterminate;
+    }, [indeterminate]);
+
+    const setRefs = (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    };
+
     return (
       <div className="relative block">
         {!loading ? (
           <div className="flex items-center">
-            <div className="h-[2.2rem] w-[2.2rem]">
-              <div className="round">
-                <input type="checkbox" ref={ref} id={id} {...props} />
+            {/* px, like the .round box inside it: rem would drift from it as the
+                root font size changes between breakpoints. */}
+            <div
+              className={
+                compact ? "h-[18px] w-[18px] shrink-0" : "h-[2.2rem] w-[2.2rem]"
+              }
+            >
+              <div className={compact ? "round round-sm" : "round"}>
+                <input type="checkbox" ref={setRefs} id={id} {...props} />
                 <label htmlFor={id}></label>
               </div>
             </div>
-            <label htmlFor={id} className="cursor-pointer">
-              {label}
-            </label>
+            {(!compact || label) && (
+              <label htmlFor={id} className="cursor-pointer">
+                {label}
+              </label>
+            )}
           </div>
         ) : (
           <div className="skeleton h-[1.8rem]"></div>
@@ -34,7 +70,12 @@ export const InputCheckbox = forwardRef<HTMLInputElement, InputCheckboxProps>(
 InputCheckbox.displayName = "InputCheckbox";
 
 export const InputToggle = forwardRef<HTMLInputElement, InputCheckboxProps>(
-  ({ label, error, id, loading, ...props }, ref) => {
+  (
+    // `indeterminate`/`compact` are checkbox-only; pulled out so they never
+    // reach the DOM as unknown attributes.
+    { label, error, id, loading, indeterminate, compact, ...props },
+    ref,
+  ) => {
     return (
       <div className="relative block">
         {!loading ? (

@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useId } from "react";
 import { createPortal } from "react-dom";
 import { useMultiSelect } from "./useMultiSelect";
 import { MultiSelectTrigger } from "./MultiSelectTrigger";
 import { MultiSelectDropdown } from "./MultiSelectDropdown";
-import type { MultiSelectProps } from "./MultiSelect.types";
+import type {
+  MultiSelectLabels,
+  MultiSelectProps,
+} from "./MultiSelect.types";
+
+export const DEFAULT_MULTISELECT_LABELS: MultiSelectLabels = {
+  placeholder: "Select an option",
+  search: "Search...",
+  noOptions: "No options",
+  noResults: "No results found",
+  selectedCount: (count) => `${count} selected`,
+  removeItem: (label) => `Remove ${label}`,
+};
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({
   label,
@@ -19,7 +31,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   maxSelectedDisplay = 3,
   required = false,
   onChange,
+  labels: labelsProp,
 }) => {
+  const labels = { ...DEFAULT_MULTISELECT_LABELS, ...labelsProp };
+  // The trigger is a `div role="button"`, which `<label htmlFor>` cannot target,
+  // so the label names it through `aria-labelledby` and focuses it on click.
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const errorId = `${baseId}-error`;
   const {
     isOpen,
     selectedIds,
@@ -46,16 +65,19 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
   const displayText = (() => {
     if (selectedOptions.length === 0)
-      return placeholder ?? "Selecciona una opción";
+      return placeholder ?? labels.placeholder;
     if (selectedOptions.length <= maxSelectedDisplay) return null;
-    return `${selectedOptions.length} item seleccionado`;
+    return labels.selectedCount(selectedOptions.length);
   })();
 
   return (
     <div className="relative block w-full mb-4" ref={containerRef}>
       <label
-        htmlFor={name}
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1"
+        id={labelId}
+        onClick={() => {
+          if (!disabled) triggerRef.current?.focus();
+        }}
+        className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
       >
         {label}
         {required && <span className="text-red-500">*</span>}
@@ -68,9 +90,13 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       </label>
 
       {!loading ? (
-        <div className="relative h-10.75 rounded-[0.3125rem] bg-red-500">
+        <div className="relative h-10.75 rounded-[0.3125rem]">
           <MultiSelectTrigger
             triggerRef={triggerRef}
+            labelId={labelId}
+            errorId={error ? errorId : undefined}
+            invalid={Boolean(error)}
+            removeItemLabel={labels.removeItem}
             selectClass={selectClass}
             isOpen={isOpen}
             disabled={disabled}
@@ -85,6 +111,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             createPortal(
               <MultiSelectDropdown
                 portalRef={portalRef}
+                labels={labels}
                 searchTerm={searchTerm}
                 filteredOptions={filteredOptions}
                 selectedIds={selectedIds}
@@ -101,6 +128,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       {error && (
         // In normal flow — see the note in Input.tsx.
         <span
+          id={errorId}
           role="alert"
           className="mt-1 block text-sm text-red-500"
         >

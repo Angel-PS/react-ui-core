@@ -30,6 +30,11 @@
   --color-gray-light: #f7f9fc;
   --color-gray-dark: #d4d4d4;
 
+  /* 10px text step for dense badges/captions (`text-2xs`), instead of
+     arbitrary `text-[10px]`. Kept in px on purpose. */
+  --text-2xs: 10px;
+  --text-2xs--line-height: 1.2;
+
   /* Refined multi-layer soft shadow scale (slate-tinted, Linear/Stripe feel).
      Overrides Tailwind defaults so every shadow-* is upgraded at once. */
   --shadow-2xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
@@ -139,6 +144,25 @@ body {
 
   .panel-container {
     @apply h-full overflow-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-md md:p-6 dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Smaller sibling of `.panel-container`: same border/fill pair, one step
+     down in radius (2xl -> xl) and elevation (md -> xs), so a card inside a
+     panel reads as the same material. */
+  .surface-card {
+    @apply rounded-xl border border-gray-200 bg-white shadow-xs transition-[box-shadow,border-color,transform] duration-200 dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Hover/focus states taken from Button so a clickable card reacts like a
+     button does. Combine with `.surface-card`. */
+  .surface-card-interactive {
+    @apply focus-visible:ring-primary-blue-light cursor-pointer outline-none hover:border-gray-300 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-1 active:translate-y-px active:shadow-xs dark:hover:border-slate-600;
+  }
+
+  /* Recessed block for totals and empty states. In dark mode the border is
+     slate-700, not slate-800, which would vanish on a slate-800 fill. */
+  .surface-inset {
+    @apply rounded-xl border border-gray-100 bg-gray-50 dark:border-slate-700 dark:bg-slate-800;
   }
 
   .icons {
@@ -265,6 +289,50 @@ body {
 
 .round input[type="checkbox"]:checked + label:after {
   opacity: 1;
+}
+
+/* Tri-state "some, not all" (InputCheckbox `indeterminate`): the same brand
+   fill, a dash instead of the tick. */
+.round input[type="checkbox"]:indeterminate + label {
+  background-color: var(--color-primary-blue-default);
+  border-color: var(--color-primary-blue-default);
+}
+
+.round input[type="checkbox"]:indeterminate + label:after {
+  opacity: 1;
+  border-left: none;
+  height: 0;
+  left: 7px;
+  top: 12px;
+  transform: none;
+}
+
+/* Compact 18px box (InputCheckbox `compact`) for dense lists such as a column
+   filter checklist, where the 28px form box outweighs 14px text. The tick and
+   the dash keep the same proportions, re-centred on the smaller box. */
+.round.round-sm label {
+  border-radius: 5px;
+  height: 18px;
+  width: 18px;
+}
+
+.round.round-sm input[type="checkbox"] {
+  height: 18px;
+  width: 18px;
+}
+
+.round.round-sm label:after {
+  height: 4px;
+  left: 3.5px;
+  top: 4px;
+  width: 8px;
+}
+
+.round.round-sm input[type="checkbox"]:indeterminate + label:after {
+  height: 0;
+  left: 3.5px;
+  top: 6.5px;
+  width: 8px;
 }
 
 /* Loading skeleton — shimmer placeholder. */

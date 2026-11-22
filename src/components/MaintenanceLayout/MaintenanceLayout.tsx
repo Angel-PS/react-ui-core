@@ -1,15 +1,26 @@
 import { useState, type FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { Table, ColumnManager, type TableLabels } from "../Table";
+import {
+  Table,
+  ColumnManager,
+  type TableLabels,
+  type ColumnManagerLabels,
+} from "../Table";
+import type { PaginationLabels } from "../Pagination";
 import { Button } from "../Button";
 import { ConfirmDialog, type ConfirmDialogItemDetail } from "../ConfirmDialog";
-import { MaintenanceFilters, type FilterController } from "../Filters";
+import {
+  MaintenanceFilters,
+  type FilterController,
+  type FiltersLabels,
+} from "../Filters";
 import {
   TableFreshnessBar,
   type TableFreshnessLabels,
 } from "../TableFreshnessBar";
 import { applyColumnPrefs } from "../../lib/applyColumnPrefs";
+import type { StatusStyle } from "../../lib/statusStyles";
 import type {
   HeaderColumn,
   RowColumn,
@@ -32,6 +43,10 @@ export interface MaintenanceLayoutLabels {
   edit: string;
   delete: string;
   addNew: string;
+  /** Search box placeholder (a `searchBar.placeholder` still wins). */
+  searchPlaceholder?: string;
+  /** The "N results" text next to the toolbar actions. */
+  resultCount?: (count: number) => string;
   /** Text for the freshness strip, only used when `refresh` is wired. */
   refresh: Partial<TableFreshnessLabels>;
   confirmDelete: {
@@ -116,8 +131,18 @@ type BaseMaintenanceLayoutProps = {
   refresh?: {
     /** Epoch ms of the last successful fetch. */
     updatedAt?: number;
+    /**
+     * A refresh the USER started is in flight (rows stay on screen, dimmed).
+     * Don't pass a data layer's generic "fetching" flag here: a filter or page
+     * change would then dim the old rows instead of showing skeletons. Prefer
+     * returning a Promise from `onRefresh` — the layout tracks it for you.
+     */
     isRefreshing?: boolean;
-    onRefresh: () => void;
+    /**
+     * Read the rows again. Return the refetch Promise and the layout tracks the
+     * manual refresh itself: repeat clicks are ignored until it settles.
+     */
+    onRefresh: () => void | Promise<unknown>;
     /** BCP-47 tag for the relative label. Default "en". */
     locale?: string;
     /** IANA zone for the absolute tooltip. Omit for the viewer's own zone. */
@@ -133,6 +158,20 @@ type BaseMaintenanceLayoutProps = {
   labels?: Partial<MaintenanceLayoutLabels>;
   /** Text overrides forwarded to the inner <Table> (e.g. a `status` display map). */
   tableLabels?: Partial<TableLabels>;
+  /** Text overrides forwarded to the column manager (only with `tableKey`). */
+  columnManagerLabels?: Partial<ColumnManagerLabels>;
+  /** Text overrides forwarded to the filter bar (Filters / Apply / Clear all…). */
+  filtersLabels?: Partial<FiltersLabels>;
+  /** Text overrides forwarded to the table's footer pagination. */
+  paginationLabels?: Partial<PaginationLabels>;
+  /** Page-size options for the footer pagination. */
+  rowsPerPageOptions?: number[];
+  /** IANA zone for date cells (and the freshness tooltip unless `refresh.timeZone` is set). */
+  timeZone?: string;
+  /** Extra status → badge classes for `status` cells, merged over the defaults. */
+  statusStyles?: Record<string, StatusStyle>;
+  /** Debounce the search box's `onSearchChange` by this many ms (e.g. 400). */
+  searchDebounceMs?: number;
 
   // ── Controlled table state (forwarded to <Table>) ──
   sort?: string | null;
@@ -199,6 +238,13 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
   defaultShowCreate = false,
   labels,
   tableLabels,
+  columnManagerLabels,
+  filtersLabels,
+  paginationLabels,
+  rowsPerPageOptions,
+  timeZone,
+  statusStyles,
+  searchDebounceMs,
   sort = null,
   onSortChange,
   searchValue,
@@ -213,20 +259,41 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
     null,
   );
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isManualRefresh, setIsManualRefresh] = useState(false);
 
   const l = mergeLabels(labels);
 
-  // Per-table column layout (only active when the consumer opts in via `tableKey`).
-  const headersToRender =
-    tableKey && columnPref ? applyColumnPrefs(headers, columnPref) : headers;
+  // Per-table column layout (only active when the consumer opts in via
+  // `tableKey`). Applied even without a saved pref, so optional
+  // (`defaultHidden`) columns start hidden for users who never customized.
+  const headersToRender = tableKey
+    ? applyColumnPrefs(headers, columnPref)
+    : headers;
   const columnManager =
     tableKey && headers.length >= 2 ? (
       <ColumnManager
         columns={headers}
         pref={columnPref}
         onApply={(next) => onColumnChange?.(next)}
+        labels={columnManagerLabels}
       />
     ) : null;
+
+  // A user-started refresh, tracked apart from `isLoading` on purpose: it keeps
+  // the rows on screen (dimmed), while a filter / search / page change still
+  // swaps them for skeletons.
+  const isRefreshing = !!refresh?.isRefreshing || isManualRefresh;
+
+  function handleRefresh() {
+    if (!refresh || isRefreshing) return;
+    const result = refresh.onRefresh();
+    if (result && typeof (result as Promise<unknown>).then === "function") {
+      setIsManualRefresh(true);
+      void Promise.resolve(result)
+        .catch(() => {})
+        .finally(() => setIsManualRefresh(false));
+    }
+  }
 
   function handleCreate() {
     if (maintenanceType === "modal") {
@@ -365,7 +432,14 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
             columnManager={columnManager}
             searchValue={searchValue ?? ""}
             onSearchChange={onSearchChange ?? (() => {})}
-            labels={{ addNew: l.addNew }}
+            searchDebounceMs={searchDebounceMs}
+            labels={{
+              addNew: l.addNew,
+              ...(l.searchPlaceholder && {
+                searchPlaceholder: l.searchPlaceholder,
+              }),
+              ...(l.resultCount && { resultCount: l.resultCount }),
+            }}
           />
         ) : (
           <div className="mb-4 flex items-center justify-end gap-2">
@@ -382,7 +456,10 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
         <div className="space-y-3">
           {filters && filters.filters.length > 0 && (
             <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
-              <MaintenanceFilters controller={filters} />
+              <MaintenanceFilters
+                controller={filters}
+                labels={filtersLabels}
+              />
             </div>
           )}
           <Table
@@ -391,16 +468,16 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
             actions={actions}
             expandFields={expandFields}
             metadata={metadata}
-            isLoading={isLoading && !refresh?.isRefreshing}
-            isRefreshing={refresh?.isRefreshing}
+            isLoading={isLoading && !isRefreshing}
+            isRefreshing={isRefreshing}
             toolbar={
               refresh ? (
                 <TableFreshnessBar
                   updatedAt={refresh.updatedAt}
-                  isRefreshing={refresh.isRefreshing}
-                  onRefresh={refresh.onRefresh}
+                  isRefreshing={isRefreshing}
+                  onRefresh={handleRefresh}
                   locale={refresh.locale}
-                  timeZone={refresh.timeZone}
+                  timeZone={refresh.timeZone ?? timeZone}
                   labels={l.refresh}
                 />
               ) : undefined
@@ -409,7 +486,11 @@ export const MaintenanceLayout: FC<MaintenanceLayoutProps> = ({
             onSortChange={onSortChange}
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
+            timeZone={timeZone}
+            statusStyles={statusStyles}
+            rowsPerPageOptions={rowsPerPageOptions}
             labels={tableLabels}
+            paginationLabels={paginationLabels}
           />
         </div>
       </div>
